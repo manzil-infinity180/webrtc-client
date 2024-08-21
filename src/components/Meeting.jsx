@@ -15,6 +15,7 @@ export function Meeting() {
     const [socketDetail, setSocketDetails] = useState(false);
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
+    const [mutedValue, setMutedValue] = useState(true);
 
     async function handleJoinMeeting() {
         // sending the iceCandidate (for peer Connection)
@@ -42,12 +43,13 @@ export function Meeting() {
     }
     useEffect(() => {
         // giving  access to video
-        window.navigator.mediaDevices.getUserMedia({video: true}).then((stream) => {
+        window.navigator.mediaDevices.getUserMedia({video: true, audio:true}).then((stream) => {
             setLocalStream(stream);
         });
         // connecting to server - socket;
         // connecting to socket and sending the meetingID == socket , signalingServer
-        const URL = 'https://webrtc-server-uviu.onrender.com'
+        // const URL = 'https://webrtc-server-uviu.onrender.com'
+        const URL = 'http://localhost:5006'
         const socketIo = io(URL,{
             transports: ['websocket', 'polling', 'flashsocket'],
         });
@@ -121,8 +123,20 @@ export function Meeting() {
    console.log({remoteStream, localStream});
     return (
         <div>
-           <Video stream={localStream} />
+           <Video stream={localStream} muted={mutedValue}/>
            <Video stream={remoteStream} />
+           <div>
+           <button onClick={() => setMutedValue(s => !s)}
+           style={{
+            position:'absolute',
+            top:'2%',
+            right:'5%',
+            padding:'5px 7px',
+
+           }}
+            >{mutedValue ? 'Unmute' : 'Mute'}</button>
+           </div>
+           
         </div>
     );
     

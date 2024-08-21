@@ -12,6 +12,7 @@ export function Home() {
             <h1>Hello, Welcome to WebRTC Video Conference</h1>
             <input type="text" placeholder="Enter the meeting Id" value={meetingId} onChange={handleMeetingId}/>
             {meetingId && <button onClick={() => navigate(`/meeting/${meetingId}`)}>{'MeetingId : '+ meetingId}</button>}
+            {meetingId && <button onClick={() => navigate(`/screen/${meetingId}`)}>{'ScreenShare : '+ meetingId}</button>}
         </div>
     );
 }

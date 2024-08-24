@@ -19,8 +19,12 @@ export function Meeting() {
     const [isScreenSharing, setIsScreenSharing] = useState(false);
     const [localChannel, setLocalChannel] = useState(null);
     const [remoteChannel, setRemoteChannel] = useState(null);
+    const [fileTransferChannel, setFileTransferChannel] = useState(null);
     const [messageSend, setMessageSend] = useState("");
     const [disabled, setDisabled] = useState(true);
+    const [isFileReady, setIsFileReady] = useState(false);
+    const [receivedFile, setReceivedFile] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
 
     async function handelSendChannelStatusChange(e) {
@@ -164,6 +168,31 @@ export function Meeting() {
         }
         setJoined(true);
     }
+    function sendFiles(file){
+        // decide the chunks to transfer in one go
+        console.log({file});
+        const chunksize = 66560;
+        const fileReader = new FileReader();
+        let offset = 0;
+        fileReader.onload = (e) => {
+            const buffer = e.target.result;
+            fileTransferChannel.send(buffer); // Send the chunk via the data channel
+
+            offset  += buffer.byteLength;
+            console.log("file transfer "+offset/1024);
+            if( offset < file.size){
+                readSlice(offset); // read next chunks 
+            }else{
+                fileTransferChannel.send('EOF');  // end of file 
+                setSelectedFile(null);
+            }
+        }
+        const readSlice = (offset) => {
+            const slice = file.slice(offset , offset + chunksize);
+            fileReader.readAsArrayBuffer(slice);
+        }
+        readSlice(0);
+    }
     useEffect(() => {
         // giving  access to video
         window.navigator.mediaDevices.getUserMedia({video: true, audio:true}).then((stream) => {
@@ -183,9 +212,53 @@ export function Meeting() {
 
           channel.onmessage = handleReceiveMessage;
           peerConnection.ondatachannel = receiveChannelCallback;
+
+          const fileChannel = peerConnection.createDataChannel('sendFiles');
+          fileChannel.binaryType = 'arraybuffer';
+          setFileTransferChannel(fileChannel);
           
-        //   peerConnection.ondatachannel = receiveChannelCallback;
-        //   setRemoteChannel(peerConnection); // remote channel  // ? try it creating new RTCPeerConnection
+         // handle the file transfer 
+        let receiveBuffer = [];
+        fileChannel.onmessage = (e) => {
+            if(e.data === 'EOF'){
+                const receiveFile = new Blob(receiveBuffer);
+                setReceivedFile(receiveFile);
+                setIsFileReady(true); // Enable the download button
+                receiveBuffer = [];
+            }else{
+                receiveBuffer.push(e.data);
+            }
+        }
+
+        // function downloadFile(blob){
+        //     const url = window.URL.createObjectURL(blob);
+        //     const anchor = document.createElement('a');
+        //     anchor.href = url;
+        //     anchor.download = 'received_file';
+        //     anchor.click();
+        //     window.URL.revokeObjectURL(url);
+        // }
+
+        // Handle incoming data channels (remote peer)
+        peerConnection.ondatachannel = (e) => {
+            const channel = e.channel;
+            console.log({channel});
+            if(channel.label === 'sendFiles'){
+
+                channel.onmessage = (e) => {
+                    if(e.data === 'EOF'){
+                        const receiveFile = new Blob(receiveBuffer);
+                        console.log({receiveFile});
+                        setReceivedFile(receiveFile);
+                        setIsFileReady(true);
+                        receiveBuffer = [];
+                    }else{
+                        receiveBuffer.push(e.data);
+                    }
+                }
+            }
+        }
+
 
         // connecting to server - socket;
         // connecting to socket and sending the meetingID == socket , signalingServer
@@ -259,6 +332,26 @@ export function Meeting() {
         // peerConnection.close();
     }
 
+    function handleFileInput(event) {
+        const file = event.target.files[0];
+        console.log({'file_input': file});
+        if (file) {
+            setSelectedFile(file);
+        }
+    }
+    function handleDownload() {
+        if (receivedFile) {
+            const url = window.URL.createObjectURL(receivedFile);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = 'received_file';
+            anchor.click();
+            window.URL.revokeObjectURL(url);
+            setIsFileReady(false);
+            setReceivedFile(null);
+        }
+    }
+
     if (!localStream) {
         return <div>
             Loading...
@@ -310,6 +403,20 @@ export function Meeting() {
            <button onClick={sendMessage} disabled={disabled}>Send Message</button>
            <button onClick={handleDisconnect} disabled={!disabled}>Disconnect Me</button>
            </div>
+           <div>
+            <input type="file" onChange={handleFileInput} />
+            <button onClick={() => sendFiles(selectedFile)} disabled={!selectedFile}>
+                Send File
+            </button>
+        </div>
+        
+        {isFileReady && (
+            <div>
+                <button onClick={handleDownload}>
+                    Download Received File
+                </button>
+            </div>
+        )}
            
         </>
         

@@ -49,7 +49,7 @@ export function ScreenShare() {
         const options = { mimeType: "video/webm; codecs=vp9" };
         // const canvas = document.getElementById("canvas"); // should be video tag
 
-// Optional frames per second argument.
+        // Optional frames per second argument.
         //    const stream = canvas.captureStream(25);
         //    console.log(window.stream);
           const mediaRecorder = new MediaRecorder(screenSharing, options);

@@ -13,6 +13,7 @@ export function Home() {
             <input type="text" placeholder="Enter the meeting Id" value={meetingId} onChange={handleMeetingId}/>
             {meetingId && <button onClick={() => navigate(`/meeting/${meetingId}`)}>{'MeetingId : '+ meetingId}</button>}
             {meetingId && <button onClick={() => navigate(`/screen/${meetingId}`)}>{'ScreenShare : '+ meetingId}</button>}
+            {meetingId && <button onClick={() => navigate(`/chat/${meetingId}`)}>{'Lets Chat : '+ meetingId}</button>}
         </div>
     );
 }

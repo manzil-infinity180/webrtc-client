@@ -1,16 +1,17 @@
-import { useEffect, useState } from 'react';
-import {useParams} from 'react-router-dom';
-import {io} from 'socket.io-client';
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import { Video } from './Video';
+import YoutubeVideos from './YoutubeVideos';
 
 // connecting to the rtcPeerConnection 
 let peerConnection = new RTCPeerConnection({
-    iceServers:  [{
+    iceServers: [{
         urls: "stun:stun.l.google.com:19302",
     },],
 });
 export function Meeting() {
-    const {meetingId} = useParams();
+    const { meetingId } = useParams();
     const [joined, setJoined] = useState(false);
     const [socketDetail, setSocketDetails] = useState(false);
     const [localStream, setLocalStream] = useState(null);
@@ -26,20 +27,22 @@ export function Meeting() {
     const [receivedFile, setReceivedFile] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [recordStream, setRecordStream] = useState();
-    const [isRecording, setIsRecording]  = useState(false);
-    const [recordOption, setRecordOption]  = useState('localStream');
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordOption, setRecordOption] = useState('localStream');
     const [fileRecOptions, setFileRecOptions] = useState({
-        name:"FIleReceived",
-        type:"video/webm"
+        name: "FIleReceived",
+        type: "video/webm"
     });
+
+
     async function handelSendChannelStatusChange(e) {
-        console.log({localChannel});
-        if(localChannel){
+        console.log({ localChannel });
+        if (localChannel) {
             const state = localChannel.readyState;
-            console.log({'state': localChannel.readyState} );
-            if(state === 'open'){
+            console.log({ 'state': localChannel.readyState });
+            if (state === 'open') {
                 setDisabled(false);
-            }else{
+            } else {
                 setDisabled(true);
             }
         }
@@ -52,7 +55,7 @@ export function Meeting() {
         channel.onclose = () => { console.log('Remote data channel is closed'); };
 
     }
-    function sendMessage(){
+    function sendMessage() {
         if (localChannel && localChannel.readyState === 'open') {
             localChannel.send(messageSend);
             let divContent = document.getElementById('helloMessage');
@@ -68,7 +71,7 @@ export function Meeting() {
         let divContent = document.getElementById('helloMessage');
         divContent.insertAdjacentHTML('beforeend', `<p>Receive Message : ${e.data}</p>`);
     }
-    function handleDisconnect(){
+    function handleDisconnect() {
         if (localChannel) {
             localChannel.close();
         }
@@ -98,7 +101,7 @@ export function Meeting() {
             try {
                 const screenStream = await window.navigator.mediaDevices.getDisplayMedia({ video: true });
                 const screenTrack = screenStream.getVideoTracks()[0];
-               
+
                 // Replace the video track in the peer connection
                 const senders = peerConnection.getSenders();
                 console.log({
@@ -106,13 +109,13 @@ export function Meeting() {
                     senders
                 });
                 const videoSender = senders.find(sender => sender.track.kind === 'video');
-                console.log({videoSender});
+                console.log({ videoSender });
                 videoSender.replaceTrack(screenTrack);
-    
+
                 // Update local stream to reflect the screen sharing
                 setLocalStream(screenStream);
                 setIsScreenSharing(true);
-    
+
                 // Handle the event when the screen sharing stops
                 screenTrack.onended = () => {
                     handleStopScreenShare();
@@ -125,17 +128,17 @@ export function Meeting() {
             handleStopScreenShare();
         }
     }
-    
+
     async function handleStopScreenShare() {
         try {
             const cameraStream = await window.navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             const cameraTrack = cameraStream.getVideoTracks()[0];
-    
+
             // Replace the video track in the peer connection
             const senders = peerConnection.getSenders();
             const videoSender = senders.find(sender => sender.track.kind === 'video');
             videoSender.replaceTrack(cameraTrack);
-    
+
             // Update local stream to reflect the camera feed
             setLocalStream(cameraStream);
             setIsScreenSharing(false);
@@ -143,38 +146,38 @@ export function Meeting() {
             console.error("Error stopping screen share: ", err);
         }
     }
-    
-    
+
+
     async function handleJoinMeeting() {
         // sending the iceCandidate (for peer Connection)
-        peerConnection.onicecandidate = ({candidate}) => {
-            console.log({candidate});
+        peerConnection.onicecandidate = ({ candidate }) => {
+            console.log({ candidate });
             socketDetail.emit('iceCandidate', {
                 candidate
             });
         }
-        console.log({peerConnection});
+        console.log({ peerConnection });
         peerConnection.addTrack(localStream.getVideoTracks()[0]);
-        console.log({'getVideoTrack': localStream.getVideoTracks()});
+        console.log({ 'getVideoTrack': localStream.getVideoTracks() });
 
-        try{
+        try {
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
             console.log({
-                'localDescription' : peerConnection.localDescription
+                'localDescription': peerConnection.localDescription
             });
             socketDetail.emit('localDescription', {
-                description : peerConnection.localDescription
+                description: peerConnection.localDescription
             });
-        }catch(err){
-            console.log({ msg:err?.message });
+        } catch (err) {
+            console.log({ msg: err?.message });
             console.error(err);
         }
         setJoined(true);
     }
-    function sendFiles(file){
+    function sendFiles(file) {
         // decide the chunks to transfer in one go
-        socketDetail.emit('fileOptions',{
+        socketDetail.emit('fileOptions', {
             'filetype': file.type,
             'filename': file.name
         });
@@ -186,60 +189,55 @@ export function Meeting() {
             const buffer = e.target.result;
             fileTransferChannel.send(buffer); // Send the chunk via the data channel
 
-            offset  += buffer.byteLength;
-            console.log("file transfer "+offset/1024);
-            if( offset < file.size){
+            offset += buffer.byteLength;
+            console.log("file transfer " + offset / 1024);
+            if (offset < file.size) {
                 readSlice(offset); // read next chunks 
-            }else{
+            } else {
                 fileTransferChannel.send('EOF');  // end of file 
                 setSelectedFile(null);
             }
         }
         const readSlice = (offset) => {
-            const slice = file.slice(offset , offset + chunksize);
+            const slice = file.slice(offset, offset + chunksize);
             fileReader.readAsArrayBuffer(slice);
         }
         readSlice(0);
     }
     useEffect(() => {
         // giving  access to video
-        window.navigator.mediaDevices.getUserMedia({video: true, audio:true}).then((stream) => {
+        window.navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             setLocalStream(stream);
         });
-          // chatting - data channel
-          const channel = peerConnection.createDataChannel('sendMessage');
-          setLocalChannel(channel);
-          channel.onopen = () => {
+        // chatting - data channel
+        const channel = peerConnection.createDataChannel('sendMessage');
+        setLocalChannel(channel);
+        channel.onopen = () => {
             console.log('Data channel is open');
             setDisabled(false);
-          };
-          channel.onclose = () => {
+        };
+        channel.onclose = () => {
             console.log('Data channel is close');
             setDisabled(true);
-          };
+        };
 
-          
-          channel.onmessage = handleReceiveMessage;
+        channel.onmessage = handleReceiveMessage;
         //   peerConnection.ondatachannel = receiveChannelCallback;
 
-          const fileChannel = peerConnection.createDataChannel('sendFiles');
-          fileChannel.binaryType = 'arraybuffer';
-          setFileTransferChannel(fileChannel);
-          
-          
-        
-
+        const fileChannel = peerConnection.createDataChannel('sendFiles');
+        fileChannel.binaryType = 'arraybuffer';
+        setFileTransferChannel(fileChannel);
 
         // connecting to server - socket;
         // connecting to socket and sending the meetingID == socket , signalingServer
         // const URL = 'https://webrtc-server-uviu.onrender.com'
         const URL = 'http://localhost:5006'
-        const socketIo = io(URL,{
+        const socketIo = io(URL, {
             transports: ['websocket', 'polling', 'flashsocket'],
         });
         socketIo.on('connect', () => {
             setSocketDetails(socketIo);
-            socketIo.on('hello',(data) => {
+            socketIo.on('hello', (data) => {
                 console.log(data);
             });
             socketIo.emit("join", {
@@ -247,19 +245,19 @@ export function Meeting() {
             });
         });
 
-        socketIo.on('localDescription', async ({description}) => {
+        socketIo.on('localDescription', async ({ description }) => {
             console.log({ description });
             peerConnection.setRemoteDescription(description);
-            peerConnection.ontrack  = (e) => {
-                console.log({'ontrackEvent'  : e.track});
+            peerConnection.ontrack = (e) => {
+                console.log({ 'ontrackEvent': e.track });
                 setRemoteStream(new MediaStream([e.track]));
             }
 
-            socketIo.on('iceCandidate', ({candidate}) => {
+            socketIo.on('iceCandidate', ({ candidate }) => {
                 peerConnection.addIceCandidate(candidate);
             });
 
-            peerConnection.onicecandidate = ({candidate}) => {
+            peerConnection.onicecandidate = ({ candidate }) => {
                 socketIo.emit('iceCandidateReply', {
                     candidate
                 });
@@ -267,90 +265,89 @@ export function Meeting() {
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
 
-            socketIo.emit('remoteDescription', {description: peerConnection.localDescription});
+            socketIo.emit('remoteDescription', { description: peerConnection.localDescription });
         });
 
-        socketIo.on('remoteDescription', async ({description}) => {
+        socketIo.on('remoteDescription', async ({ description }) => {
             console.log({ description });
             peerConnection.setRemoteDescription(description);
-            peerConnection.ontrack  = (e) => {
+            peerConnection.ontrack = (e) => {
                 console.log(e.track);
                 setRemoteStream(new MediaStream([e.track]));
             }
 
-            socketIo.on('iceCandidateReply', ({candidate}) => {
-                console.log({'iceCandidate' : candidate});
+            socketIo.on('iceCandidateReply', ({ candidate }) => {
+                console.log({ 'iceCandidate': candidate });
                 peerConnection.addIceCandidate(candidate);
             });
 
-            peerConnection.onicecandidate = ({candidate}) => {
+            peerConnection.onicecandidate = ({ candidate }) => {
                 socketIo.emit('iceCandidateReply', {
                     candidate
                 });
             }
         });
 
-        socketIo.on('fileOptions',(data) => {
-            const {filename, filetype} = data;
+        socketIo.on('fileOptions', (data) => {
+            const { filename, filetype } = data;
             console.log(data);
             setFileRecOptions({
                 name: filename,
                 type: filetype
             });
-          });
+        });
 
 
-         // handle the file transfer 
-         let receiveBuffer = [];
-         fileChannel.onmessage = (e) => {
-             if(e.data === 'EOF'){
-                 const receiveFile = new Blob(receiveBuffer,{type: fileRecOptions.type});
-                 console.log(fileRecOptions);
-                 setReceivedFile(receiveFile);
-                 setIsFileReady(true); // Enable the download button
-                 receiveBuffer = [];
-             }else{
-                 receiveBuffer.push(e.data);
-             }
-         }
- 
-         // Handle incoming data channels (remote peer)
-         peerConnection.ondatachannel = (e) => {
-             const file_channel = e.channel;
-             if(file_channel.label === 'sendFiles'){
- 
-                 file_channel.onmessage = (e) => {
-                     if(e.data === 'EOF'){
-                         const receiveFile = new Blob(receiveBuffer,{type: fileRecOptions.type,});
-                         console.log({receiveFile});
-                         console.log(fileRecOptions);
-                         setReceivedFile(receiveFile);
-                         setIsFileReady(true);
-                         receiveBuffer = [];
-                     }else{
-                         receiveBuffer.push(e.data);
-                     }
-                 }
-             }else if(file_channel.label === 'sendMessage'){
+        // handle the file transfer 
+        let receiveBuffer = [];
+        fileChannel.onmessage = (e) => {
+            if (e.data === 'EOF') {
+                const receiveFile = new Blob(receiveBuffer, { type: fileRecOptions.type });
+                console.log(fileRecOptions);
+                setReceivedFile(receiveFile);
+                setIsFileReady(true); // Enable the download button
+                receiveBuffer = [];
+            } else {
+                receiveBuffer.push(e.data);
+            }
+        }
+
+        // Handle incoming data channels (remote peer)
+        peerConnection.ondatachannel = (e) => {
+            const file_channel = e.channel;
+            console.log(file_channel);
+            if (file_channel.label === 'sendFiles') {
+
+                file_channel.onmessage = (e) => {
+                    if (e.data === 'EOF') {
+                        const receiveFile = new Blob(receiveBuffer, { type: fileRecOptions.type, });
+                        console.log({ receiveFile });
+                        console.log(fileRecOptions);
+                        setReceivedFile(receiveFile);
+                        setIsFileReady(true);
+                        receiveBuffer = [];
+                    } else {
+                        receiveBuffer.push(e.data);
+                    }
+                }
+            } else if (file_channel.label === 'sendMessage') {
                 receiveChannelCallback(e);
-             }
-         }
+            }
+        }
 
-    },[]);
+    }, []);
 
-    function handleClose(){
+    function handleClose() {
         console.log({
             peerConnection,
             localStream,
             remoteStream
         });
-        // peerConnection.removeTrack(sender);
-        // peerConnection.close();
     }
 
     function handleFileInput(event) {
         const file = event.target.files[0];
-        console.log({'file_input': file});
+        console.log({ 'file_input': file });
         if (file) {
             setSelectedFile(file);
         }
@@ -379,26 +376,26 @@ export function Meeting() {
         //    const stream = canvas.captureStream(25);
         //    console.log(window.stream);
         let mediaRecorder;
-        if(recordOption === 'localStream'){
-             mediaRecorder = new MediaRecorder(localStream,options);
-        }else{
-            mediaRecorder = new MediaRecorder(remoteStream,options);
+        if (recordOption === 'localStream') {
+            mediaRecorder = new MediaRecorder(localStream, options);
+        } else {
+            mediaRecorder = new MediaRecorder(remoteStream, options);
         }
-          mediaRecorder.ondataavailable = handleDataAvailable;
-          mediaRecorder.start();
-          setRecordStream(mediaRecorder);
-          setIsRecording(true);
-          function handleDataAvailable(e){
+        mediaRecorder.ondataavailable = handleDataAvailable;
+        mediaRecorder.start();
+        setRecordStream(mediaRecorder);
+        setIsRecording(true);
+        function handleDataAvailable(e) {
             console.log("data-available");
             if (e.data.size > 0) {
                 recordedChunks.push(e.data);
                 console.log(recordedChunks);
                 download();
-            }   
+            }
         }
         function download() {
             const blob = new Blob(recordedChunks, {
-              type: "video/webm",
+                type: "video/webm",
             });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -408,14 +405,14 @@ export function Meeting() {
             a.download = "test.webm";
             a.click();
             window.URL.revokeObjectURL(url);
-          }
+        }
     }
     function StopRecord() {
         recordStream.stop();
         setIsRecording(false);
     }
-    function handleRecordOption(e){
-        if(e.target.value !== 'localStream'){
+    function handleRecordOption(e) {
+        if (e.target.value !== 'localStream') {
             setRecordOption('remoteStream');
         }
         console.log(e.target.value);
@@ -426,7 +423,7 @@ export function Meeting() {
         </div>
     }
 
-    if(!joined){
+    if (!joined) {
         return (
             <div>
                 <h3>Joining Meeting {meetingId}</h3>
@@ -434,67 +431,83 @@ export function Meeting() {
             </div>
         );
     }
-   console.log({remoteStream, localStream});
+    console.log({ remoteStream, localStream });
     return (
-        <>
-           <button onClick={handleClose}>Close</button>
-           <button onClick={handleScreenShare}>
-            {isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
-             </button>
-           <Video stream={localStream} muted={mutedValue}/>
-           <Video stream={remoteStream} />
-           <div  style={{
-            position:'absolute',
-            top:'2%',
-            right:'5%',
-            padding:'5px 7px',
-           }}>
-           <button onClick={() => setMutedValue(s => !s)}
-           style={{
-            position:'absolute',
-            top:'2%',
-            right:'5%',
-            padding:'5px 7px',
+        <div>
 
-           }}
-            >{mutedValue ? 'Unmute' : 'Mute'}</button>
-            
-           </div>
-           <div>
-           <div id='helloMessage' style={{
-                margin:'25px'
-            }}>
-                <p>Hello World</p>
-            </div>
-           <input type='text' name="message" disabled={disabled} value={messageSend} onChange={(e)  => setMessageSend(e.target.value)}/>
-           <button onClick={handelSendChannelStatusChange}>Connect</button>
-           <button onClick={sendMessage} disabled={disabled}>Send Message</button>
-           <button onClick={handleDisconnect} disabled={!disabled}>Disconnect Me</button>
-           </div>
-           <div>
-            <input type="file" onChange={handleFileInput} />
-            <button onClick={() => sendFiles(selectedFile)} disabled={!selectedFile}>
-                Send File
-            </button>
-        </div>
-        
-        {isFileReady && (
             <div>
-                <button onClick={handleDownload}>
-                    Download Received File
+                <div>
+                <Video stream={localStream} muted={mutedValue} />
+                <Video stream={remoteStream} />
+                </div>
+                <div>
+                <button onClick={handleClose}>Close</button>
+                <button onClick={handleScreenShare}>
+                    {isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
+                </button>
+                </div>
+            </div>
+
+            <div style={{
+                position: 'absolute',
+                top: '2%',
+                right: '5%',
+                padding: '5px 7px',
+            }}>
+                <button onClick={() => setMutedValue(s => !s)}
+                    style={{
+                        position: 'absolute',
+                        top: '2%',
+                        right: '5%',
+                        padding: '5px 7px',
+
+                    }}
+                >{mutedValue ? 'Unmute' : 'Mute'}</button>
+
+            </div>
+            <div>
+                <div id='helloMessage' style={{
+                    margin: '25px'
+                }}>
+                    <p>Hello World</p>
+                </div>
+                <input type='text' name="message" disabled={disabled} value={messageSend} onChange={(e) => setMessageSend(e.target.value)} />
+                <button onClick={handelSendChannelStatusChange}>Connect</button>
+                <button onClick={sendMessage} disabled={disabled}>Send Message</button>
+                <button onClick={handleDisconnect} disabled={!disabled}>Disconnect Me</button>
+            </div>
+            <div>
+                <input type="file" onChange={handleFileInput} />
+                <button onClick={() => sendFiles(selectedFile)} disabled={!selectedFile}>
+                    Send File
                 </button>
             </div>
-        )}
 
-        {(!isRecording) && <button onClick={RecordWindow}>RECORD</button>}
-        {isRecording &&  <button onClick={StopRecord}>Stop</button>}
+            {isFileReady && (
+                <div>
+                    <button onClick={handleDownload}>
+                        Download Received File
+                    </button>
+                </div>
+            )}
 
-        <select onChange={handleRecordOption}>
-            <option name="localStream" value={'localStream'} defaultValue={true}>Record Myself</option>
-            <option name="remoteStream" value={'remoteStream'}>Record Other</option>
-        </select>
-           
-        </>
-        
-    ); 
+            {(!isRecording) && <button onClick={RecordWindow}>RECORD</button>}
+            {isRecording && <button onClick={StopRecord}>Stop</button>}
+
+            <select onChange={handleRecordOption}>
+                <option name="localStream" value={'localStream'} defaultValue={true}>Record Myself</option>
+                <option name="remoteStream" value={'remoteStream'}>Record Other</option>
+            </select>
+            {/* {showVideo && <div style={{
+        position:'absolute',
+        right:'0px',
+        top:'120px'
+       }}>
+            <YoutubeVideos ytDataChannel={ytDataChannel} peerConnection={peerConnection}/>
+        </div>} */}
+            <YoutubeVideos peerConnection={peerConnection} />
+
+        </div>
+
+    );
 }

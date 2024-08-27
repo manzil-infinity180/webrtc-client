@@ -1,20 +1,21 @@
 import { useEffect, useRef } from "react";
 
-export function Video({stream, muted=true,width='40%',height='40%', controls=false}) {
+export function Video({stream, muted=true,width='35%',height='35%', controls=false}) {
     const videoStream = useRef();
     useEffect(() => {
         if(videoStream && videoStream.current){
+            console.log(videoStream.current);
             videoStream.current.srcObject = stream
         }
     },[videoStream, stream]);
     return (
         <>
         {console.log(stream)}
-        {stream && <div>
-            <video style={{borderRadius: 10, width:width, height:height}} ref={videoStream} 
+        {stream && <>
+            <video style={{borderRadius: 10, width:width, height:height, margin:'4px'}} ref={videoStream} 
             muted={muted} autoPlay={true} playsInline={true}
-            controls={controls} />
-        </div>
+            controls={controls} className="video_hai"/>
+        </>
         }
         </>
     );

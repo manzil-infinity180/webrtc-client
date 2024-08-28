@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export function Video({stream, muted=true,width='35%',height='35%', controls=false}) {
+export function Video({stream, muted=true,width='25%',height='25%', controls=false}) {
     const videoStream = useRef();
     useEffect(() => {
         if(videoStream && videoStream.current){

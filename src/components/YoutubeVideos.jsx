@@ -95,16 +95,20 @@ function YoutubeVideos({peerConnection}) {
     }
 
     return (
-        <>
-            <h1>Youtube</h1>
+        <div>
+            <h1 className="text-lg font-medium">Youtube</h1>
             <div id="player" />
+            <div  className="m-4"> 
             <input type="text" placeholder="video link" value={videoID} onChange={e => setVideoID(e.target.value)} />
-            <button onClick={loadVideo}>Load video</button>
-                
-            <button onClick={startVideo}>Start video</button>
-            <button onClick={stopVideo}>Stop video</button>
-            <button onClick={skipVideo}>Skip by 5 Sec</button>
-        </>
+            <div>
+            <button onClick={loadVideo} className="text-lg font-medium m-1">Load video</button>
+            <button onClick={startVideo}className="text-lg font-medium m-1">Start video</button>
+            <button onClick={stopVideo}className="text-lg font-medium m-1 ">Stop video</button>
+            <button onClick={skipVideo}className="text-lg font-medium m-1">Skip by 5 Sec</button>
+            </div>
+            
+            </div>
+        </div>
     );
 }
 

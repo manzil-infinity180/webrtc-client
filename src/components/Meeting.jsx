@@ -12,22 +12,24 @@ let peerConnection = new RTCPeerConnection({
 });
 export function Meeting() {
     const { meetingId } = useParams();
-    const [joined, setJoined] = useState(false);
-    const [socketDetail, setSocketDetails] = useState(false);
+    const [option, setOption] = useState({
+        joined: false,
+        isRecording: false,
+        isFileReady: false,
+        isScreenSharing: false,
+        mutedValue: true,
+        disabled: true
+    });
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
-    const [mutedValue, setMutedValue] = useState(true);
-    const [isScreenSharing, setIsScreenSharing] = useState(false);
+    const [socketDetail, setSocketDetails] = useState(false);
     const [localChannel, setLocalChannel] = useState(null);
     const [remoteChannel, setRemoteChannel] = useState(null);
     const [fileTransferChannel, setFileTransferChannel] = useState(null);
     const [messageSend, setMessageSend] = useState("");
-    const [disabled, setDisabled] = useState(true);
-    const [isFileReady, setIsFileReady] = useState(false);
     const [receivedFile, setReceivedFile] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [recordStream, setRecordStream] = useState();
-    const [isRecording, setIsRecording] = useState(false);
     const [recordOption, setRecordOption] = useState('localStream');
     const [fileRecOptions, setFileRecOptions] = useState({
         name: "FIleReceived",
@@ -41,9 +43,9 @@ export function Meeting() {
             const state = localChannel.readyState;
             console.log({ 'state': localChannel.readyState });
             if (state === 'open') {
-                setDisabled(false);
+                setOption((s) => ({ ...s, disabled: false }));
             } else {
-                setDisabled(true);
+                setOption((s) => ({ ...s, disabled: true }));
             }
         }
     }
@@ -58,8 +60,12 @@ export function Meeting() {
     function sendMessage() {
         if (localChannel && localChannel.readyState === 'open') {
             localChannel.send(messageSend);
-            let divContent = document.getElementById('helloMessage');
-            divContent.insertAdjacentHTML('beforeend', `<p>Sent Message : ${messageSend}</p>`);
+            let divContent = document.getElementById('yeahBaby');
+            divContent.insertAdjacentHTML('beforeend', `
+                <tr>
+                <td translate="no" className="py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400">
+                Sent Message : ${messageSend}</td>
+                </tr>`);
             setMessageSend("");
         } else {
             console.warn('Data channel is not open');
@@ -68,8 +74,14 @@ export function Meeting() {
     function handleReceiveMessage(e) {
         // pEle.innerHTML = "Receive Message : "+e.data;
         console.log('Event Data ' + e.data);
-        let divContent = document.getElementById('helloMessage');
-        divContent.insertAdjacentHTML('beforeend', `<p>Receive Message : ${e.data}</p>`);
+        // let divContent = document.getElementById('helloMessage');
+        // divContent.insertAdjacentHTML('beforeend', `<p>Receive Message : ${e.data}</p>`);
+        let divContent = document.getElementById('yeahBaby');
+        divContent.insertAdjacentHTML('beforeend', `
+                <tr>
+                <td translate="no" className="py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400">
+                Receive Message : ${e.data}</td>
+                </tr>`);
     }
     function handleDisconnect() {
         if (localChannel) {
@@ -97,7 +109,7 @@ export function Meeting() {
     }, []);
 
     async function handleScreenShare() {
-        if (!isScreenSharing) {
+        if (!option.isScreenSharing) {
             try {
                 const screenStream = await window.navigator.mediaDevices.getDisplayMedia({ video: true });
                 const screenTrack = screenStream.getVideoTracks()[0];
@@ -114,8 +126,7 @@ export function Meeting() {
 
                 // Update local stream to reflect the screen sharing
                 setLocalStream(screenStream);
-                setIsScreenSharing(true);
-
+                setOption((s) => ({ ...s, isScreenSharing: true }));
                 // Handle the event when the screen sharing stops
                 screenTrack.onended = () => {
                     handleStopScreenShare();
@@ -141,7 +152,7 @@ export function Meeting() {
 
             // Update local stream to reflect the camera feed
             setLocalStream(cameraStream);
-            setIsScreenSharing(false);
+            setOption((s) => ({ ...s, isScreenSharing: false }));
         } catch (err) {
             console.error("Error stopping screen share: ", err);
         }
@@ -173,7 +184,8 @@ export function Meeting() {
             console.log({ msg: err?.message });
             console.error(err);
         }
-        setJoined(true);
+        // setJoined(true);
+        setOption((s) => ({ ...s, joined: true }));
     }
     function sendFiles(file) {
         // decide the chunks to transfer in one go
@@ -214,11 +226,11 @@ export function Meeting() {
         setLocalChannel(channel);
         channel.onopen = () => {
             console.log('Data channel is open');
-            setDisabled(false);
+            setOption((s) => ({ ...s, disabled: false }));
         };
         channel.onclose = () => {
             console.log('Data channel is close');
-            setDisabled(true);
+            setOption((s) => ({ ...s, disabled: true }));
         };
 
         channel.onmessage = handleReceiveMessage;
@@ -296,8 +308,6 @@ export function Meeting() {
                 type: filetype
             });
         });
-
-
         // handle the file transfer 
         let receiveBuffer = [];
         fileChannel.onmessage = (e) => {
@@ -305,7 +315,7 @@ export function Meeting() {
                 const receiveFile = new Blob(receiveBuffer, { type: fileRecOptions.type });
                 console.log(fileRecOptions);
                 setReceivedFile(receiveFile);
-                setIsFileReady(true); // Enable the download button
+                setOption((s) => ({ ...s, isFileReady: true }));  // Enable the download button
                 receiveBuffer = [];
             } else {
                 receiveBuffer.push(e.data);
@@ -324,7 +334,7 @@ export function Meeting() {
                         console.log({ receiveFile });
                         console.log(fileRecOptions);
                         setReceivedFile(receiveFile);
-                        setIsFileReady(true);
+                        setOption((s) => ({ ...s, isFileReady: true }));
                         receiveBuffer = [];
                     } else {
                         receiveBuffer.push(e.data);
@@ -361,20 +371,15 @@ export function Meeting() {
             anchor.download = fileRecOptions.name;
             anchor.click();
             window.URL.revokeObjectURL(url);
-            setIsFileReady(false);
+            setOption((s) => ({ ...s, isFileReady: false }));
             setReceivedFile(null);
         }
     }
-
     // record one screen 
     async function RecordWindow() {
         const recordedChunks = [];
         const options = { mimeType: "video/webm; codecs=vp9" };
         // const canvas = document.getElementById("canvas"); // should be video tag
-
-        // Optional frames per second argument.
-        //    const stream = canvas.captureStream(25);
-        //    console.log(window.stream);
         let mediaRecorder;
         if (recordOption === 'localStream') {
             mediaRecorder = new MediaRecorder(localStream, options);
@@ -384,7 +389,7 @@ export function Meeting() {
         mediaRecorder.ondataavailable = handleDataAvailable;
         mediaRecorder.start();
         setRecordStream(mediaRecorder);
-        setIsRecording(true);
+        setOption((s) => ({ ...s, isRecording: true }));
         function handleDataAvailable(e) {
             console.log("data-available");
             if (e.data.size > 0) {
@@ -409,7 +414,7 @@ export function Meeting() {
     }
     function StopRecord() {
         recordStream.stop();
-        setIsRecording(false);
+        setOption((s) => ({ ...s, isRecording: false }));
     }
     function handleRecordOption(e) {
         if (e.target.value !== 'localStream') {
@@ -423,7 +428,7 @@ export function Meeting() {
         </div>
     }
 
-    if (!joined) {
+    if (!option.joined) {
         return (
             <div>
                 <h3>Joining Meeting {meetingId}</h3>
@@ -433,81 +438,83 @@ export function Meeting() {
     }
     console.log({ remoteStream, localStream });
     return (
-        <div>
-
-            <div>
-                <div>
-                <Video stream={localStream} muted={mutedValue} />
-                <Video stream={remoteStream} />
+        <>
+            <div className="p-4 space-y-6 bg-gray-100">
+                <div className="bg-white p-6 shadow-lg rounded-md">
+                    <div className="flex justify-start space-x-4 mb-4">
+                        <Video stream={localStream} muted={option.mutedValue} />
+                        <Video stream={remoteStream} />
+                    </div>
+                    <div className="flex space-x-4">
+                        <button onClick={handleClose} className="btn btn-secondary text-lg font-medium m-1">Close</button>
+                        <button onClick={handleScreenShare} className="btn btn-secondary text-lg font-medium m-1">
+                            {option.isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
+                        </button>
+                        <button onClick={() => setOption((s) => ({ ...s, mutedValue: !option.mutedValue }))} className="btn btn-secondary text-lg font-medium m-1">
+                            {option.mutedValue ? 'Unmute' : 'Mute'}
+                        </button>
+                    </div>
                 </div>
-                <div>
-                <button onClick={handleClose}>Close</button>
-                <button onClick={handleScreenShare}>
-                    {isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
-                </button>
+
+                <div className="relative bg-white p-4 shadow-lg rounded-md flex justify-center">
+                    <YoutubeVideos peerConnection={peerConnection} />
+                </div>
+
+                <div className="bg-white p-6 shadow-lg rounded-md">
+                    <div className="mb-4">
+                        <div id='helloMessage' className="text-lg font-medium">Start Messaging</div>
+                        <input type='text' name="message" disabled={option.disabled} value={messageSend}
+                            onChange={(e) => setMessageSend(e.target.value)}
+                            className="input-field"
+                        />
+                        <div className="flex space-x-4 mt-4">
+                            <button onClick={handelSendChannelStatusChange} className="btn btn-primary text-lg font-medium m-1">Connect</button>
+                            <button onClick={sendMessage} disabled={option.disabled} className="btn btn-primary text-lg font-medium m-1">Send Message</button>
+                            <button onClick={handleDisconnect} disabled={!option.disabled} className="btn btn-danger text-lg font-medium m-1">Disconnect Me</button>
+                        </div>
+                    </div>
+                    <div className="mb-4">
+                        <div className='flex space-x-4 mt-4'>
+                            <div className="text-lg font-medium">Send Any Type File P2P</div>
+                            <input type="file" onChange={handleFileInput} className="file-input" />
+                            <button onClick={() => sendFiles(selectedFile)} disabled={!selectedFile}
+                                className="btn btn-primary text-lg font-medium m-1">
+                                Send File
+                            </button>
+                            {option.isFileReady && (
+                                <button onClick={handleDownload} className="btn btn-secondary mt-4 text-lg font-medium m-1">
+                                    Download Received File
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <div className='flex space-x-4 mt-4'>
+                        <div className="text-lg font-medium">Recording </div>
+                        {!option.isRecording ? (
+                            <button onClick={RecordWindow} className="btn btn-primary mt-4 text-lg font-medium m-1">RECORD</button>
+                        ) : (
+                            <button onClick={StopRecord} className="btn btn-danger text-lg font-medium m-1">Stop</button>
+                        )}
+
+                        <select onChange={handleRecordOption} className="select-box mt-4">
+                            <option name="localStream" value={'localStream'} defaultValue={true}>Record Myself</option>
+                            <option name="remoteStream" value={'remoteStream'}>Record Other</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div className="bg-white p-6 shadow-lg rounded-md">
+                    <table className='w-full text-left border-collapse'>
+                        <tbody className='align-baseline' id='yeahBaby'>
+                            <tr>
+                                <td translate="no" className="py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400">All Message Here</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
                 </div>
             </div>
-
-            <div style={{
-                position: 'absolute',
-                top: '2%',
-                right: '5%',
-                padding: '5px 7px',
-            }}>
-                <button onClick={() => setMutedValue(s => !s)}
-                    style={{
-                        position: 'absolute',
-                        top: '2%',
-                        right: '5%',
-                        padding: '5px 7px',
-
-                    }}
-                >{mutedValue ? 'Unmute' : 'Mute'}</button>
-
-            </div>
-            <div>
-                <div id='helloMessage' style={{
-                    margin: '25px'
-                }}>
-                    <p>Hello World</p>
-                </div>
-                <input type='text' name="message" disabled={disabled} value={messageSend} onChange={(e) => setMessageSend(e.target.value)} />
-                <button onClick={handelSendChannelStatusChange}>Connect</button>
-                <button onClick={sendMessage} disabled={disabled}>Send Message</button>
-                <button onClick={handleDisconnect} disabled={!disabled}>Disconnect Me</button>
-            </div>
-            <div>
-                <input type="file" onChange={handleFileInput} />
-                <button onClick={() => sendFiles(selectedFile)} disabled={!selectedFile}>
-                    Send File
-                </button>
-            </div>
-
-            {isFileReady && (
-                <div>
-                    <button onClick={handleDownload}>
-                        Download Received File
-                    </button>
-                </div>
-            )}
-
-            {(!isRecording) && <button onClick={RecordWindow}>RECORD</button>}
-            {isRecording && <button onClick={StopRecord}>Stop</button>}
-
-            <select onChange={handleRecordOption}>
-                <option name="localStream" value={'localStream'} defaultValue={true}>Record Myself</option>
-                <option name="remoteStream" value={'remoteStream'}>Record Other</option>
-            </select>
-            {/* {showVideo && <div style={{
-        position:'absolute',
-        right:'0px',
-        top:'120px'
-       }}>
-            <YoutubeVideos ytDataChannel={ytDataChannel} peerConnection={peerConnection}/>
-        </div>} */}
-            <YoutubeVideos peerConnection={peerConnection} />
-
-        </div>
-
+        </>
     );
 }

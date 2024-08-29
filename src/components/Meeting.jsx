@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Video } from './Video';
 import YoutubeVideos from './YoutubeVideos';
+import MonacoCodeEditor from './MonacoCodeEditor';
 
 // connecting to the rtcPeerConnection 
 let peerConnection = new RTCPeerConnection({
@@ -515,6 +516,7 @@ export function Meeting() {
                     </table>
                 </div>
             </div>
+            <MonacoCodeEditor />
         </>
     );
 }

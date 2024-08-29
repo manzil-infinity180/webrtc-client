@@ -6,6 +6,8 @@ import { MessageBot } from './components/MessageBot';
 import MyEditor from './components/CodeEditor';
 import YoutubeVideos from './components/YoutubeVideos';
 import YoutubeContent from './components/YoutubeContent';
+import MonacoCodeEditor from './components/MonacoCodeEditor';
+import Interview from './components/Interview';
 // import './index.css'
 function App() {
   const router = createBrowserRouter([
@@ -27,7 +29,7 @@ function App() {
     },
     {
       path:'/editor',
-      element: <MyEditor />
+      element: <MonacoCodeEditor />
     },
     {
       path:'/yt',
@@ -36,6 +38,10 @@ function App() {
     {
       path:'/content',
       element: <YoutubeContent />
+    },
+    {
+      path:'/code/:meetingId',
+      element: <Interview />
     }
   ]);
 

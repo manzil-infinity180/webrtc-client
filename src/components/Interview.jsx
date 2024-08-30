@@ -133,29 +133,39 @@ function Interview() {
 
     if (!option.joined) {
         return (
-            <div>
-                <h3>Joining Meeting {meetingId}</h3>
-                <button onClick={handleJoinMeeting}>{meetingId}</button>
+            <div className='flex justify-center items-center flex-col h-screen'>
+                <img src='https://webrtcclient.com/wp-content/uploads/2021/09/WebRTC-740-fi.png' alt="webrtc"
+                    className='w-48 sm:w-72' />
+                <h3 className='text-xl italic'>Join the Meeting</h3>
+                <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>
             </div>
         );
     }
 
     return (
         <>
-        <div className="p-4 space-y-6 bg-gray-100">
+            <div className="p-4 space-y-6 bg-gray-100">
+                <div className='flex justify-center'>
+                <span className="text-2xl sm:text-3xl font-serif mb-1 mt-0 bg-pink-200 text-center rounded px-4">
+                    Interview Section - Peer to Peer
+                </span>
+                </div>
                 <div className="bg-white p-6 shadow-lg rounded-md">
-                    <div className="flex justify-start space-x-4 mb-4">
+                    <div className="flex justify-center space-x-4 mb-4">
                         <Video stream={localStream} muted={option.mutedValue} />
                         <Video stream={remoteStream} />
                     </div>
-                    <div className="flex space-x-4">
-                        <button onClick={() => setOption((s) => ({ ...s, mutedValue: !option.mutedValue }))} className="btn btn-secondary text-lg font-medium m-1">
-                            {option.mutedValue ? 'Unmute' : 'Mute'}
-                        </button>
+                    <div className='flex justify-center'>
+                    <button onClick={() => setOption((s) => ({ ...s, mutedValue: !option.mutedValue }))}
+                        className={`btn btn-secondary font-medium m-1 text-lg border font-serif rounded border-white text-center px-2 py-1 ${option.mutedValue ? 'bg-green-500' : 'bg-red-600 text-white'}`}>
+                        {option.mutedValue ? 'Unmute' : 'Mute'}
+                    </button>
                     </div>
+                    
+                    
                 </div>
-        </div>
-        <MonacoCodeEditor />
+            </div>
+            <MonacoCodeEditor />
         </>
     );
 }

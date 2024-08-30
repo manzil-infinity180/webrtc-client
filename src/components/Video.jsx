@@ -14,7 +14,7 @@ export function Video({stream, muted=true,width='25%',height='25%', controls=fal
         {stream && <>
             <video style={{borderRadius: 10, width:width, height:height, margin:'4px'}} ref={videoStream} 
             muted={muted} autoPlay={true} playsInline={true}
-            controls={controls} className="video_hai"/>
+            controls={controls} className="video_hai" />
         </>
         }
         </>

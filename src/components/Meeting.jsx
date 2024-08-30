@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import {useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Video } from './Video';
 import YoutubeVideos from './YoutubeVideos';
-import MonacoCodeEditor from './MonacoCodeEditor';
+import { Loader } from '../utils/Loader';
 
 // connecting to the rtcPeerConnection 
 let peerConnection = new RTCPeerConnection({
@@ -11,8 +11,10 @@ let peerConnection = new RTCPeerConnection({
         urls: "stun:stun.l.google.com:19302",
     },],
 });
+console.log({ peerConnection });
 export function Meeting() {
     const { meetingId } = useParams();
+    const navigate = useNavigate();
     const [option, setOption] = useState({
         joined: false,
         isRecording: false,
@@ -83,17 +85,6 @@ export function Meeting() {
                 <td translate="no" className="py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400">
                 Receive Message : ${e.data}</td>
                 </tr>`);
-    }
-    function handleDisconnect() {
-        if (localChannel) {
-            localChannel.close();
-        }
-        if (peerConnection) {
-            peerConnection.close();
-        }
-        if (socketDetail) {
-            socketDetail.disconnect();
-        }
     }
     useEffect(() => {
         return () => {
@@ -174,6 +165,7 @@ export function Meeting() {
 
         try {
             const offer = await peerConnection.createOffer();
+            console.log({ offer });
             await peerConnection.setLocalDescription(offer);
             console.log({
                 'localDescription': peerConnection.localDescription
@@ -267,6 +259,7 @@ export function Meeting() {
             }
 
             socketIo.on('iceCandidate', ({ candidate }) => {
+                console.log({ candidate });
                 peerConnection.addIceCandidate(candidate);
             });
 
@@ -276,6 +269,7 @@ export function Meeting() {
                 });
             }
             const answer = await peerConnection.createAnswer();
+            console.log({ answer });
             await peerConnection.setLocalDescription(answer);
 
             socketIo.emit('remoteDescription', { description: peerConnection.localDescription });
@@ -349,11 +343,24 @@ export function Meeting() {
     }, []);
 
     function handleClose() {
-        console.log({
-            peerConnection,
-            localStream,
-            remoteStream
-        });
+
+        if (localChannel) {
+            localChannel.close();
+        }
+        if (peerConnection) {
+            peerConnection.close();
+        }
+        if (socketDetail) {
+            socketDetail.disconnect();
+        }
+        if(localStream){
+            localStream.getTracks().forEach(function(track) {
+                track.stop();
+              });
+        }
+        setTimeout(() => {
+            navigate('/');
+        },400);
     }
 
     function handleFileInput(event) {
@@ -424,16 +431,16 @@ export function Meeting() {
         console.log(e.target.value);
     }
     if (!localStream) {
-        return <div>
-            Loading...
-        </div>
+        return <Loader />
     }
 
     if (!option.joined) {
         return (
-            <div>
-                <h3>Joining Meeting {meetingId}</h3>
-                <button onClick={handleJoinMeeting}>{meetingId}</button>
+            <div className='flex justify-center items-center flex-col h-screen'>
+                <img src='https://webrtcclient.com/wp-content/uploads/2021/09/WebRTC-740-fi.png' alt="webrtc"
+                    className='w-48 sm:w-72' />
+                <h3 className='text-xl italic'>Join the Meeting</h3>
+                <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>
             </div>
         );
     }
@@ -441,17 +448,24 @@ export function Meeting() {
     return (
         <>
             <div className="p-4 space-y-6 bg-gray-100">
+            <div className='flex justify-center'>
+                <span className="text-2xl sm:text-3xl font-serif mb-1 mt-0 bg-pink-200 text-center rounded px-4">
+                    Reach Peer to Peer Communication
+                </span>
+                </div>
                 <div className="bg-white p-6 shadow-lg rounded-md">
-                    <div className="flex justify-start space-x-4 mb-4">
+                    <div className="flex justify-center space-x-4 mb-4">
                         <Video stream={localStream} muted={option.mutedValue} />
                         <Video stream={remoteStream} />
                     </div>
-                    <div className="flex space-x-4">
-                        <button onClick={handleClose} className="btn btn-secondary text-lg font-medium m-1">Close</button>
-                        <button onClick={handleScreenShare} className="btn btn-secondary text-lg font-medium m-1">
+                    <div className="flex space-x-4 justify-center">
+                        <button onClick={handleClose} className="btn btn-secondary font-medium m-1 text-lg border border-white font-serif rounded  bg-red-600 text-white px-3 py-2">Close</button>
+                        <button onClick={handleScreenShare}
+                            className={`btn btn-secondary font-medium m-1 text-lg border font-serif rounded text-white border-white ${option.isScreenSharing ? 'bg-red-600' : 'bg-indigo-500'}`}>
                             {option.isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
                         </button>
-                        <button onClick={() => setOption((s) => ({ ...s, mutedValue: !option.mutedValue }))} className="btn btn-secondary text-lg font-medium m-1">
+                        <button onClick={() => setOption((s) => ({ ...s, mutedValue: !option.mutedValue }))}
+                            className={`btn btn-secondary font-medium m-1 text-lg border font-serif rounded border-white ${option.mutedValue ? 'bg-green-500' : 'bg-red-600 text-white'}`}>
                             {option.mutedValue ? 'Unmute' : 'Mute'}
                         </button>
                     </div>
@@ -462,42 +476,49 @@ export function Meeting() {
                 </div>
 
                 <div className="bg-white p-6 shadow-lg rounded-md">
-                    <div className="mb-4">
-                        <div id='helloMessage' className="text-lg font-medium">Start Messaging</div>
+                    <div>
+                        <div id='helloMessage'>
+                            <h1 className="text-3xl font-mono text-start">Messenger</h1>
+                            <button onClick={handelSendChannelStatusChange}
+                                className="font-medium px-2 py-1 text-lg text-white border border-white font-serif rounded bg-green-500"
+                            >Is Connected</button>
+                        </div>
                         <input type='text' name="message" disabled={option.disabled} value={messageSend}
                             onChange={(e) => setMessageSend(e.target.value)}
-                            className="input-field"
+                            className="bg-gray-200 outline-none border font-mono rounded px-5 py-2 w-1/4"
                         />
-                        <div className="flex space-x-4 mt-4">
-                            <button onClick={handelSendChannelStatusChange} className="btn btn-primary text-lg font-medium m-1">Connect</button>
-                            <button onClick={sendMessage} disabled={option.disabled} className="btn btn-primary text-lg font-medium m-1">Send Message</button>
-                            <button onClick={handleDisconnect} disabled={!option.disabled} className="btn btn-danger text-lg font-medium m-1">Disconnect Me</button>
-                        </div>
+                        <button onClick={sendMessage} disabled={option.disabled}
+                            className="mx-2 font-medium px-2 py-1 text-lg text-white border border-white font-serif rounded bg-blue-500"
+                        >Send Message</button>
+
                     </div>
-                    <div className="mb-4">
+                    <div>
                         <div className='flex space-x-4 mt-4'>
-                            <div className="text-lg font-medium">Send Any Type File P2P</div>
-                            <input type="file" onChange={handleFileInput} className="file-input" />
+                            <div className="text-lg font-serif">Send Any Type File P2P</div>
+                            <input type="file" onChange={handleFileInput} className="file-input text-lg font-serif" />
                             <button onClick={() => sendFiles(selectedFile)} disabled={!selectedFile}
-                                className="btn btn-primary text-lg font-medium m-1">
-                                Send File
+                                className={`btn btn-primary font-medium text-lg border font-serif rounded ${selectedFile && 'bg-green-400 border-none'}`}
+                            >Send File
                             </button>
                             {option.isFileReady && (
-                                <button onClick={handleDownload} className="btn btn-secondary mt-4 text-lg font-medium m-1">
+                                <button onClick={handleDownload} className="btn btn-secondary m-1 font-medium text-lg border-none px-2 font-serif rounded bg-blue-500 text-white">
                                     Download Received File
                                 </button>
                             )}
                         </div>
                     </div>
                     <div className='flex space-x-4 mt-4'>
-                        <div className="text-lg font-medium">Recording </div>
                         {!option.isRecording ? (
-                            <button onClick={RecordWindow} className="btn btn-primary mt-4 text-lg font-medium m-1">RECORD</button>
+                            <button onClick={RecordWindow}
+                                className={`btn btn-secondary mt-4 font-medium px-2 py-1 text-lg text-white border  border-white font-serif rounded bg-green-600`}
+                            >Start Recording</button>
                         ) : (
-                            <button onClick={StopRecord} className="btn btn-danger text-lg font-medium m-1">Stop</button>
+                            <button onClick={StopRecord}
+                                className={`btn btn-secondary mt-4 font-medium px-2 py-1 text-lg text-white border  border-white font-serif rounded bg-red-600`}
+                            >Stop</button>
                         )}
 
-                        <select onChange={handleRecordOption} className="select-box mt-4">
+                        <select onChange={handleRecordOption} className="mt-4 font-mono text-md rounded bg-blue-200">
                             <option name="localStream" value={'localStream'} defaultValue={true}>Record Myself</option>
                             <option name="remoteStream" value={'remoteStream'}>Record Other</option>
                         </select>
@@ -508,7 +529,7 @@ export function Meeting() {
                     <table className='w-full text-left border-collapse'>
                         <tbody className='align-baseline' id='yeahBaby'>
                             <tr>
-                                <td translate="no" className="py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400">All Message Here</td>
+                                <td translate="no" className="py-2 pr-2 font-serif text-xl leading-6 whitespace-nowrap ">All Messages</td>
                             </tr>
 
                         </tbody>
@@ -516,7 +537,6 @@ export function Meeting() {
                     </table>
                 </div>
             </div>
-            <MonacoCodeEditor />
         </>
     );
 }

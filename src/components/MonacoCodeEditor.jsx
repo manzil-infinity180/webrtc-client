@@ -102,14 +102,18 @@ function MonacoCodeEditor() {
     }
     return (
         <div>
+            <div className='flex justify-center my-4'>
             <LanguageOptions setSelectedOption={setSelectedOption} selectedOption={selectedOption.language} />
+            <button onClick={handleSubmitCode} className='mt-4 font-mono text-md rounded bg-blue-200 py-2 border'>Submit Code</button>
+            </div>
+            
             <Editor height="90vh" defaultValue="// some comment" defaultLanguage="javascript"
                 onMount={editor => { setEditor(editor) }}
                 onChange={handleChangeCode}
                 language={selectedOption.language}
                 theme='vs-dark'
             />
-            <button onClick={handleSubmitCode}>Submit Code</button>
+            
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import YoutubeContent from "./YoutubeContent";
 
 function YoutubeVideos({peerConnection}) {
     const [videoID, setVideoID] = useState("");
@@ -34,7 +35,7 @@ function YoutubeVideos({peerConnection}) {
                 if (data.state === 1) youtubePlayer.current.playVideo();
                 else if (data.state === 2) youtubePlayer.current.pauseVideo();
             }
-           
+
         };
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -95,18 +96,20 @@ function YoutubeVideos({peerConnection}) {
     }
 
     return (
-        <div>
-            <h1 className="text-lg font-medium">Youtube</h1>
+        <div className="flex-wrap">
+            <h1 className="text-3xl font-mono text-center my-2">Youtube</h1>
+            <div className="grid sm:grid-cols-2 gap-36">
             <div id="player" />
-            <div  className="m-4"> 
-            <input type="text" placeholder="video link" value={videoID} onChange={e => setVideoID(e.target.value)} />
-            <div>
-            <button onClick={loadVideo} className="text-lg font-medium m-1">Load video</button>
-            <button onClick={startVideo}className="text-lg font-medium m-1">Start video</button>
-            <button onClick={stopVideo}className="text-lg font-medium m-1 ">Stop video</button>
-            <button onClick={skipVideo}className="text-lg font-medium m-1">Skip by 5 Sec</button>
+            <div> <YoutubeContent ytDataChannel={ytDataChannel} youtubePlayer={youtubePlayer}/> </div>
             </div>
-            
+            <div className="m-0 flex justify-center flex-col"> 
+            <input type="text" placeholder="video link" value={videoID} className="m-2 bg-gray-200 outline-none border font-mono rounded px-4 py-2 w-1/3" onChange={e => setVideoID(e.target.value)} />
+            <div>
+            <button onClick={loadVideo}  className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg text-white border border-white font-serif rounded bg-blue-500">Load video</button>
+            <button onClick={startVideo} className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg border  border-white font-serif rounded bg-yellow-300 ">Start video</button>
+            <button onClick={stopVideo}  className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg text-white border  border-white font-serif rounded bg-red-600">Stop video</button>
+            <button onClick={skipVideo}  className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg  border border-white font-serif rounded bg-yellow-300">Skip by 5 Sec</button>
+            </div>
             </div>
         </div>
     );

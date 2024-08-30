@@ -14,7 +14,7 @@ function LanguageOptions({setSelectedOption, selectedOption}) {
     }
     return (
         <div>
-            <select onChange={handleLanguage} value={selectedOption}>
+            <select onChange={handleLanguage} value={selectedOption} className="mt-4 font-mono text-md rounded bg-blue-200 py-2 border outline-none px-4 mx-2">
                 {
                     supportedLanguage.map((el) => (
                         <option data-id={el.id} value={el.value} key={el.id}>{el.value}</option>

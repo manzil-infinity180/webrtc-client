@@ -1,13 +1,13 @@
 import ZoomMtgEmbedded from '@zoom/meetingsdk/embedded'
 function ZoomSdk() {
     const client = ZoomMtgEmbedded.createClient();
-    var authEndpoint = 'http://localhost:4000/'
+    var authEndpoint = import.meta.env.VITE_AUTH_ENDPOINT
     var sdkKey = import.meta.env.VITE_CLIENT_ID
-    var meetingNumber = '493 046 2975'
-    var passWord = 'p0qawf'
+    var meetingNumber = import.meta.env.VITE_MEETING_ID
+    var passWord = import.meta.env.VITE_PASSWORD
     var role = 1
-    var userName = 'Rahul Vishwakarma'
-    var userEmail = 'rahulvs2809@gmail.com'
+    var userName = import.meta.env.VITE_USERNAME
+    var userEmail = import.meta.env.VITE_USER_EMAIL
     var registrantToken = ''
     var zakToken = ''
 

@@ -4,6 +4,7 @@ import {Meeting} from './components/Meeting';
 import { ScreenShare } from './components/ScreenShare';
 import { MessageBot } from './components/MessageBot';
 import MyEditor from './components/CodeEditor';
+import { Toaster } from "react-hot-toast"
 import YoutubeVideos from './components/YoutubeVideos';
 import YoutubeContent from './components/YoutubeContent';
 import MonacoCodeEditor from './components/MonacoCodeEditor';
@@ -48,6 +49,38 @@ function App() {
   return (
     <>
       <RouterProvider router={router} />
+      <Toaster
+          position="top-right"
+          reverseOrder={false}
+          toastOptions={{
+            success: {
+              style: {
+                backgroundColor: "white",
+                color: "green",
+                border: "1px solid green",
+                padding: "15px",
+                marginRight: "20px",
+              },
+              iconTheme: {
+                primary: "green",
+                secondary: "white",
+              },
+            },
+            error: {
+              style: {
+                backgroundColor: "white",
+                color: "red",
+                border: "1px solid red",
+                padding: "15px",
+                marginRight: "20px",
+              },
+              iconTheme: {
+                primary: "red",
+                secondary: "white",
+              },
+            },
+          }}
+        />
     </>
   )
 }

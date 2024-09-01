@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import {useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Video } from './Video';
 import YoutubeVideos from './YoutubeVideos';
 import { Loader } from '../utils/Loader';
+import toast from 'react-hot-toast';
 
 // connecting to the rtcPeerConnection 
 let peerConnection = new RTCPeerConnection({
@@ -38,6 +39,13 @@ export function Meeting() {
         name: "FIleReceived",
         type: "video/webm"
     });
+    const chatBoxRef = useRef(null);
+    useEffect(() => {
+        // Scroll to the bottom when a new message is added
+        if (chatBoxRef.current) {
+            chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+        }
+    });
 
 
     async function handelSendChannelStatusChange(e) {
@@ -63,28 +71,42 @@ export function Meeting() {
     function sendMessage() {
         if (localChannel && localChannel.readyState === 'open') {
             localChannel.send(messageSend);
-            let divContent = document.getElementById('yeahBaby');
+            let divContent = document.getElementById('chat-box');
             divContent.insertAdjacentHTML('beforeend', `
-                <tr>
-                <td translate="no" className="py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400">
-                Sent Message : ${messageSend}</td>
+                <tr class="text-right m-3">
+                <td class="max-w-md">
+                <span
+                 translate="no" class="inline-block py-2 m-2 px-4 pr-2 font-mono font-medium text-md leading-6 text-slate-50 whitespace-normal break-words dark:text-white bg-green-600 rounded-lg">
+                 ${escapeHTML(messageSend)}</span> </td>
                 </tr>`);
+            divContent.scrollTop = divContent.scrollHeight; // Scroll to bottom
             setMessageSend("");
         } else {
             console.warn('Data channel is not open');
         }
     }
+    function escapeHTML(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
     function handleReceiveMessage(e) {
-        // pEle.innerHTML = "Receive Message : "+e.data;
         console.log('Event Data ' + e.data);
-        // let divContent = document.getElementById('helloMessage');
-        // divContent.insertAdjacentHTML('beforeend', `<p>Receive Message : ${e.data}</p>`);
-        let divContent = document.getElementById('yeahBaby');
+        let divContent = document.getElementById('chat-box');
+
         divContent.insertAdjacentHTML('beforeend', `
-                <tr>
-                <td translate="no" className="py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400">
-                Receive Message : ${e.data}</td>
+                <tr class="text-left m-3">
+                <td class="max-w-md">
+                    <span
+                    translate="no" class="inline-block py-2 m-2 px-4 pr-2 font-mono font-medium text-md leading-6 text-slate-50 whitespace-normal break-words dark:text-white bg-purple-600 rounded-lg">
+                    ${escapeHTML(e.data)}</span>
+                </td>
                 </tr>`);
+        divContent.scrollTop = divContent.scrollHeight; // Scroll to bottom
+        toast.success("Message Received");
     }
     useEffect(() => {
         return () => {
@@ -115,7 +137,7 @@ export function Meeting() {
                 const videoSender = senders.find(sender => sender.track.kind === 'video');
                 console.log({ videoSender });
                 videoSender.replaceTrack(screenTrack);
-
+                toast.success("Started Sharing Screen");
                 // Update local stream to reflect the screen sharing
                 setLocalStream(screenStream);
                 setOption((s) => ({ ...s, isScreenSharing: true }));
@@ -162,7 +184,7 @@ export function Meeting() {
         console.log({ peerConnection });
         peerConnection.addTrack(localStream.getVideoTracks()[0]);
         console.log({ 'getVideoTrack': localStream.getVideoTracks() });
-
+        toast.success("Lets Fun bro");
         try {
             const offer = await peerConnection.createOffer();
             console.log({ offer });
@@ -216,6 +238,9 @@ export function Meeting() {
         });
         // chatting - data channel
         const channel = peerConnection.createDataChannel('sendMessage');
+        if (channel.readyState === 'open') {
+            toast.success("Messenger section is now activated");
+        }
         setLocalChannel(channel);
         channel.onopen = () => {
             console.log('Data channel is open');
@@ -353,14 +378,14 @@ export function Meeting() {
         if (socketDetail) {
             socketDetail.disconnect();
         }
-        if(localStream){
-            localStream.getTracks().forEach(function(track) {
+        if (localStream) {
+            localStream.getTracks().forEach(function (track) {
                 track.stop();
-              });
+            });
         }
         setTimeout(() => {
             navigate('/');
-        },400);
+        }, 400);
     }
 
     function handleFileInput(event) {
@@ -381,6 +406,7 @@ export function Meeting() {
             window.URL.revokeObjectURL(url);
             setOption((s) => ({ ...s, isFileReady: false }));
             setReceivedFile(null);
+            toast.success("Downloading....");
         }
     }
     // record one screen 
@@ -398,6 +424,7 @@ export function Meeting() {
         mediaRecorder.start();
         setRecordStream(mediaRecorder);
         setOption((s) => ({ ...s, isRecording: true }));
+        toast.success("Started Recording...");
         function handleDataAvailable(e) {
             console.log("data-available");
             if (e.data.size > 0) {
@@ -438,6 +465,7 @@ export function Meeting() {
         return (
             <div className='flex justify-center items-center flex-col h-screen'>
                 <img src='https://webrtcclient.com/wp-content/uploads/2021/09/WebRTC-740-fi.png' alt="webrtc"
+                    loading='lazy'
                     className='w-48 sm:w-72' />
                 <h3 className='text-xl italic'>Join the Meeting</h3>
                 <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>
@@ -448,10 +476,10 @@ export function Meeting() {
     return (
         <>
             <div className="p-4 space-y-6 bg-gray-100">
-            <div className='flex justify-center'>
-                <span className="text-2xl sm:text-3xl font-serif mb-1 mt-0 bg-pink-200 text-center rounded px-4">
-                    Reach Peer to Peer Communication
-                </span>
+                <div className='flex justify-center'>
+                    <span className="text-2xl sm:text-3xl font-serif mb-1 mt-0 bg-pink-200 text-center rounded px-4">
+                        Reach Peer to Peer Communication
+                    </span>
                 </div>
                 <div className="bg-white p-6 shadow-lg rounded-md">
                     <div className="flex justify-center space-x-4 mb-4">
@@ -526,15 +554,15 @@ export function Meeting() {
 
                 </div>
                 <div className="bg-white p-6 shadow-lg rounded-md">
-                    <table className='w-full text-left border-collapse'>
-                        <tbody className='align-baseline' id='yeahBaby'>
-                            <tr>
-                                <td translate="no" className="py-2 pr-2 font-serif text-xl leading-6 whitespace-nowrap ">All Messages</td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
+                    <div ref={chatBoxRef} className="chat-container h-64 overflow-y-auto p-4 border border-gray-300 rounded-md">
+                        <table className='w-full text-left border-collapse'>
+                            <tbody className='align-baseline' id='chat-box'>
+                                <tr>
+                                    <td translate="no" className="py-2 my-3 pr-2 font-serif text-xl leading-6 whitespace-nowrap ">All Messages</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </>

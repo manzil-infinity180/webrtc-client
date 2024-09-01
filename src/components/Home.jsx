@@ -19,7 +19,7 @@ export function Home() {
                 <div className="bg-white shadow-lg rounded-md flex justify-center m-10 my-6 md:mx-25 lg:mx-40 flex-wrap">
                     <div className="flex justify-start space-x-4 mb-4">
                         <img src={p2p}
-                             className="w-80 h-52 m-4 md:w-96 md:h-60" />
+                             className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
                     </div>
                     <div className="mx-12 flex justify-center flex-col mb-6">
                         <h4 className="m-1 text-xl text-center mt-4 font-mono bg-blue-100 opacity-85 rounded">Peer to Peer Communication</h4>
@@ -33,7 +33,7 @@ export function Home() {
             <div className="bg-white shadow-lg rounded-md flex justify-center mx-10 my-6 md:mx-25 lg:mx-40 flex-wrap">
                 <div className="flex justify-start space-x-4 mb-4">
                     <img src={code_editor}
-                        className="w-80 h-52 m-4 md:w-96 md:h-60" />
+                        className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
                 </div>
                 <div className="mx-12 flex justify-center flex-col mb-6">
                     <h4 className="text-xl text-center mt-4 m-1 font-mono bg-yellow-100 opacity-85 rounded">Interview P2P</h4>
@@ -47,7 +47,7 @@ export function Home() {
             <div className="bg-white shadow-lg rounded-md flex justify-center mx-10 my-6 md:mx-25 lg:mx-40 flex-wrap">
                 <div className="flex justify-start space-x-4 mb-4">
                     <img src={one_many}
-                        className="w-80 h-52 m-4 md:w-96 md:h-60" />
+                        className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
                 </div>
                 <div className="mx-12 flex justify-center flex-col mb-6">
                     <h4 className="m-1 text-xl text-center mt-4 font-mono bg-pink-100 opacity-85 rounded">One to Many VideoCall</h4>

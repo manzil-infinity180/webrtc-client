@@ -12,7 +12,7 @@ export function Home() {
     }
     return (
         <>
-            <div className="bg-gray-100">
+            <div className="bg-gray-100 flex flex-col flex-wrap">
                 <div className="flex justify-center mt-4 text-2xl sm:text-3xl font-serif">
                     Real Time Interactive Portal
                 </div>
@@ -35,9 +35,9 @@ export function Home() {
                     <img src={code_editor}
                         className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
                 </div>
-                <div className="mx-12 flex justify-center flex-col mb-6">
+                <div className="mx-12 flex justify-center flex-col mb-6 flex-wrap">
                     <h4 className="text-xl text-center mt-4 m-1 font-mono bg-yellow-100 opacity-85 rounded">Interview P2P</h4>
-                    <p className="mt-1 text-center font-serif">Collobrative Code Editor and Peer to Peer Interaction</p>
+                    <p className="mt-1 text-center font-serif ">Collobrative Code Editor and P2P Interaction</p>
                     <button className="mx-12 my-4 text-xl font-serif rounded border bg-violet-500 text-white py-1"
                     onClick={() => navigate(`/code/${uuidv4()}`)}
                     >Lets Do 1:1 And Code Editor</button>
@@ -49,10 +49,36 @@ export function Home() {
                     <img src={one_many}
                         className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
                 </div>
-                <div className="mx-12 flex justify-center flex-col mb-6">
+                <div className="mx-12 flex justify-center flex-col mb-6 flex-wrap">
                     <h4 className="m-1 text-xl text-center mt-4 font-mono bg-pink-100 opacity-85 rounded">One to Many VideoCall</h4>
-                    <p className="mt-0 pt-0 text-center font-serif">Collobrative Code Editor and Peer to Peer Interaction</p>
+                    <p className="mt-0 pt-0 text-center font-serif mx-2">Interact with your 3-4 friends with Video/Audio </p>
                     <button className="mx-12 my-4 text-xl font-serif text-white rounded border bg-violet-500 py-1">Lets Do One : Many</button>
+                </div>
+            </div>
+
+            <div className="bg-white shadow-lg rounded-md flex justify-center mx-10 my-6 md:mx-25 lg:mx-40 flex-wrap">
+                <div className="flex justify-start space-x-4 mb-4">
+                    <img src={one_many}
+                        className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
+                </div>
+                <div className="mx-12 flex justify-center flex-col mb-6">
+                    <h4 className="m-1 text-xl text-center mt-4 font-mono bg-pink-100 opacity-85 rounded">One to Many - Video/Audio</h4>
+                    <p className="mt-0 pt-0 text-center font-serif">Using GetStream Video/Audio SDK</p>
+                    <button className="mx-12 my-4 text-xl font-serif text-white rounded border bg-violet-500 py-1">Lets Go Friend - GetStream</button>
+                </div>
+            </div>
+
+            <div className="bg-white shadow-lg rounded-md flex justify-center mx-10 my-6 md:mx-25 lg:mx-40 flex-wrap">
+                <div className="flex justify-start space-x-4 mb-4">
+                    <img src={one_many}
+                        className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
+                </div>
+                <div className="mx-12 flex justify-center flex-col mb-6">
+                    <h4 className="m-1 text-xl text-center mt-4 font-mono bg-pink-100 opacity-85 rounded">Zoom Integration</h4>
+                    <p className="mt-0 pt-0 text-center font-serif mx-2">Join the meeting using Meeting Id and Password</p>
+                    <button 
+                    onClick={() => navigate('zoom/call')}
+                    className="mx-14 my-4 text-xl font-serif text-white rounded border bg-violet-500 py-1"> Lets Do Zoom Meeting </button>
                 </div>
             </div>
             </div>

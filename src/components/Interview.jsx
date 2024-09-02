@@ -135,6 +135,7 @@ function Interview() {
         return (
             <div className='flex justify-center items-center flex-col h-screen'>
                 <img src='https://webrtcclient.com/wp-content/uploads/2021/09/WebRTC-740-fi.png' alt="webrtc"
+                loading='lazy'
                     className='w-48 sm:w-72' />
                 <h3 className='text-xl italic'>Join the Meeting</h3>
                 <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>

@@ -1,15 +1,16 @@
 import ZoomMtgEmbedded from '@zoom/meetingsdk/embedded'
 function ZoomSdk() {
     const client = ZoomMtgEmbedded.createClient();
-    var authEndpoint = import.meta.env.VITE_AUTH_ENDPOINT
-    var sdkKey = import.meta.env.VITE_CLIENT_ID
-    var meetingNumber = import.meta.env.VITE_MEETING_ID
-    var passWord = import.meta.env.VITE_PASSWORD
-    var role = 1
-    var userName = import.meta.env.VITE_USERNAME
-    var userEmail = import.meta.env.VITE_USER_EMAIL
-    var registrantToken = ''
-    var zakToken = ''
+    let authEndpoint = import.meta.env.VITE_AUTH_ENDPOINT
+    let sdkKey = import.meta.env.VITE_CLIENT_ID
+    let meetingNumber = 4930462975
+    let passWord = import.meta.env.VITE_PASSWORD
+    let role = 0
+    let userName = import.meta.env.VITE_USERNAME
+    let userEmail = ''
+    let registrantToken = ''
+    let zakToken = ''
+    let leaveUrl = 'http://localhost:5173/';
 
     async function getSignature(e) {
         e.preventDefault();
@@ -31,6 +32,7 @@ function ZoomSdk() {
         function startMeeting(signature) {
             let meetingSDKElement = document.getElementById('meetingSDKElement');
             client.init({
+                leaveUrl: leaveUrl,
                 zoomAppRoot: meetingSDKElement, language: 'en-US',
                 patchJsMedia: true, leaveOnPageUnload: true
             }).then(() => {
@@ -39,9 +41,9 @@ function ZoomSdk() {
                     sdkKey: sdkKey,
                     meetingNumber: meetingNumber,
                     password: passWord,
-                    // userName: userName,
+                    userName: userName,
                     // userEmail: userEmail,
-                    // // tk: registrantToken,
+                    tk: '',
                     // zak: zakToken
                 }).then(() => {
                     console.log('joined successfully')

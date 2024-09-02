@@ -9,6 +9,7 @@ import YoutubeVideos from './components/YoutubeVideos';
 import YoutubeContent from './components/YoutubeContent';
 import MonacoCodeEditor from './components/MonacoCodeEditor';
 import Interview from './components/Interview';
+import ZoomSdk from './components/ZoomSdk';
 // import './index.css'
 function App() {
   const router = createBrowserRouter([
@@ -43,6 +44,10 @@ function App() {
     {
       path:'/code/:meetingId',
       element: <Interview />
+    },
+    {
+      path:'/zoom/call',
+      element: <ZoomSdk />
     }
   ]);
 

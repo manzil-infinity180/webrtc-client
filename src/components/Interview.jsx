@@ -30,8 +30,8 @@ function Interview() {
         });
         // connecting to server - socket;
         // connecting to socket and sending the meetingID == socket , signalingServer
-        // const URL = 'https://webrtc-server-uviu.onrender.com'
-        const URL = 'http://localhost:5006'
+        // const URL = 'http://localhost:5006'
+        const URL = import.meta.env.VITE_SEVER_API; 
         const socketIo = io(URL, {
             transports: ['websocket', 'polling', 'flashsocket'],
         });

@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import { Video } from './Video';
 import { Editor } from '@monaco-editor/react';
 import MonacoCodeEditor from './MonacoCodeEditor';
+import toast from 'react-hot-toast';
 let peerConnection = new RTCPeerConnection({
     iceServers: [{
         urls: "stun:stun.l.google.com:19302",
@@ -14,6 +15,7 @@ function Interview() {
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
     const [socketDetail, setSocketDetails] = useState(false);
+    const [roomId, setRoomId] = useState("");
     const [option, setOption] = useState({
         joined: false,
         isRecording: false,
@@ -132,13 +134,33 @@ function Interview() {
 
 
     if (!option.joined) {
+        function handleInvitationLink(){
+            const msg = `
+            Your Friend is inviting you to a fun meeting.
+
+            Topic: Lets do some Chit-Chat
+
+            Join Zoom Meeting
+             ${window.location.href.split('/meeting/')}
+
+            Meeting ID: ${window.location.href.split('/meeting/')[1]}
+             `
+            navigator.clipboard.writeText(msg);
+            toast.success(`Copied Invite Link`);
+        }
         return (
             <div className='flex justify-center items-center flex-col h-screen'>
                 <img src='https://webrtcclient.com/wp-content/uploads/2021/09/WebRTC-740-fi.png' alt="webrtc"
-                loading='lazy'
+                    loading='lazy'
                     className='w-48 sm:w-72' />
                 <h3 className='text-xl italic'>Join the Meeting</h3>
+                <input placeholder='Enter Room Id' className="file-input text-lg font-serif m-4 px-2" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
                 <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>
+                {roomId && <div className='flex justify-center cursor-pointer' onClick={handleInvitationLink}  >
+                    <span className="text-xs sm:text-lg font-serif mt-3 bg-pink-200 text-center rounded px-4 opacity-65">
+                        Copy Invitation Link
+                    </span>
+                </div>}
             </div>
         );
     }

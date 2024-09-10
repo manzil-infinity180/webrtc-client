@@ -25,7 +25,7 @@ export function Home() {
                         <h4 className="m-1 text-xl text-center mt-4 font-mono bg-blue-100 opacity-85 rounded">Peer to Peer Communication</h4>
                         <p className="mt-1 text-center font-serif">P2P call, Yt Video, Messenging and Transfer files</p>
                         <button className="text-xl font-serif rounded border bg-violet-500 text-white py-1" 
-                        onClick={() => navigate(`/meeting/${uuidv4()}`)}
+                        onClick={() => navigate(`/meeting`)}
                         >Lets Do Peer : Peer</button>
                     </div>
                 </div>
@@ -39,7 +39,7 @@ export function Home() {
                     <h4 className="text-xl text-center mt-4 m-1 font-mono bg-yellow-100 opacity-85 rounded">Interview P2P</h4>
                     <p className="mt-1 text-center font-serif ">Collobrative Code Editor and P2P Interaction</p>
                     <button className="mx-12 my-4 text-xl font-serif rounded border bg-violet-500 text-white py-1"
-                    onClick={() => navigate(`/code/${uuidv4()}`)}
+                    onClick={() => navigate(`/code`)}
                     >Lets Do 1:1 And Code Editor</button>
                 </div>
             </div>
@@ -52,7 +52,9 @@ export function Home() {
                 <div className="mx-12 flex justify-center flex-col mb-6 flex-wrap">
                     <h4 className="m-1 text-xl text-center mt-4 font-mono bg-pink-100 opacity-85 rounded">One to Many VideoCall</h4>
                     <p className="mt-0 pt-0 text-center font-serif mx-2">Interact with your 3-4 friends with Video/Audio </p>
-                    <button className="mx-12 my-4 text-xl font-serif text-white rounded border bg-violet-500 py-1">Lets Do One : Many</button>
+                    <button className="mx-12 my-4 text-xl font-serif text-white rounded border bg-violet-500 py-1"
+                     onClick={() => navigate(`/zoom/call`)}
+                    >Lets Do One : Many</button>
                 </div>
             </div>
 

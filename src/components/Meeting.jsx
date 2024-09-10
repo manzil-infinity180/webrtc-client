@@ -39,6 +39,7 @@ export function Meeting() {
         name: "FIleReceived",
         type: "video/webm"
     });
+    const [roomId, setRoomId] = useState("");
     const chatBoxRef = useRef(null);
     useEffect(() => {
         // Scroll to the bottom when a new message is added
@@ -174,6 +175,10 @@ export function Meeting() {
 
 
     async function handleJoinMeeting() {
+        if(roomId.length < 1) {
+            toast.error("Enter Your Room Id");
+            return;
+        }
         // sending the iceCandidate (for peer Connection)
         peerConnection.onicecandidate = ({ candidate }) => {
             console.log({ candidate });
@@ -482,12 +487,13 @@ export function Meeting() {
                     loading='lazy'
                     className='w-48 sm:w-72' />
                 <h3 className='text-xl italic'>Join the Meeting</h3>
+                <input placeholder='Enter Room Id' className="file-input text-lg font-serif m-4 px-2" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
                 <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>
-                <div className='flex justify-center cursor-pointer' onClick={handleInvitationLink}  >
+                {roomId && <div className='flex justify-center cursor-pointer' onClick={handleInvitationLink}  >
                     <span className="text-xs sm:text-lg font-serif mt-3 bg-pink-200 text-center rounded px-4 opacity-65">
                         Copy Invitation Link
                     </span>
-                </div>
+                </div>}
             </div>
         );
     }

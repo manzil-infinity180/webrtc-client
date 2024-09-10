@@ -18,15 +18,15 @@ function App() {
       element: <Home />
     },
     {
-      path: '/meeting/:meetingId',
+      path: '/meeting',
       element: <Meeting />
     },
     {
-      path: '/screen/:meetingId',
+      path: '/screen',
       element: <ScreenShare />
     },
     {
-      path:'/chat/:meetingId',
+      path:'/chat',
       element: <MessageBot />
     },
     {
@@ -42,7 +42,7 @@ function App() {
       element: <YoutubeContent />
     },
     {
-      path:'/code/:meetingId',
+      path:'/code',
       element: <Interview />
     },
     {

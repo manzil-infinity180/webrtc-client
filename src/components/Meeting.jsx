@@ -467,20 +467,20 @@ export function Meeting() {
     }
 
     if (!option.joined) {
-        function handleInvitationLink(){
-            const msg = `
-            Your Friend is inviting you to a fun meeting.
+        // function handleInvitationLink(){
+        //     const msg = `
+        //     Your Friend is inviting you to a fun meeting.
 
-            Topic: Lets do some Chit-Chat
+        //     Topic: Lets do some Chit-Chat
 
-            Join Zoom Meeting
-             ${window.location.href.split('/meeting/')}
+        //     Join Zoom Meeting
+        //      ${window.location.href.split('/meeting/')}
 
-            Meeting ID: ${window.location.href.split('/meeting/')[1]}
-             `
-            navigator.clipboard.writeText(msg);
-            toast.success(`Copied Invite Link`);
-        }
+        //     Meeting ID: ${roomId}
+        //      `
+        //     navigator.clipboard.writeText(msg);
+        //     toast.success(`Copied Invite Link`);
+        // }
         return (
             <div className='flex justify-center items-center flex-col h-screen'>
                 <img src='https://webrtcclient.com/wp-content/uploads/2021/09/WebRTC-740-fi.png' alt="webrtc"
@@ -489,11 +489,11 @@ export function Meeting() {
                 <h3 className='text-xl italic'>Join the Meeting</h3>
                 <input placeholder='Enter Room Id' className="file-input text-lg font-serif m-4 px-2" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
                 <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>
-                {roomId && <div className='flex justify-center cursor-pointer' onClick={handleInvitationLink}  >
+                {/* {roomId && <div className='flex justify-center cursor-pointer' onClick={handleInvitationLink}  >
                     <span className="text-xs sm:text-lg font-serif mt-3 bg-pink-200 text-center rounded px-4 opacity-65">
                         Copy Invitation Link
                     </span>
-                </div>}
+                </div>} */}
             </div>
         );
     }
@@ -507,7 +507,7 @@ export function Meeting() {
                     </span>
                 </div>
                 <div className="bg-white p-6 shadow-lg rounded-md">
-                    <div className="flex justify-center space-x-4 mb-4">
+                    <div className="flex-col justify-center space-x-4 mb-4 md:flex md:flex-row">
                         <Video stream={localStream} muted={option.mutedValue} />
                         <Video stream={remoteStream} />
                     </div>

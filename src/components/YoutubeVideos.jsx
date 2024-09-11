@@ -97,24 +97,53 @@ function YoutubeVideos({peerConnection}) {
     }
 
     return (
-        <div className="flex-wrap">
-            <h1 className="text-3xl font-mono text-center my-2">Youtube</h1>
-            <div className="grid sm:grid-cols-2 gap-36">
-            <div id="player" className="rounded-md"/>
-            <div> <YoutubeContent onVideoSelect={loadVideo}/> </div>
-            </div>
-            <div className="m-0 flex justify-center flex-col"> 
-            <input type="text" placeholder="video link" value={videoID} className="m-2 bg-gray-200 outline-none border font-mono rounded px-4 py-2 w-1/3" 
-            onChange={e => setVideoID(e.target.value)} 
-            autoComplete='false'/>
-            <div>
-            <button onClick={() => loadVideo(videoID)}  className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg text-white border border-white font-serif rounded bg-blue-500">Load video</button>
-            <button onClick={startVideo} className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg border  border-white font-serif rounded bg-yellow-300 ">Start video</button>
-            <button onClick={stopVideo}  className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg text-white border  border-white font-serif rounded bg-red-600">Stop video</button>
-            <button onClick={skipVideo}  className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg  border border-white font-serif rounded bg-yellow-300">Skip by 5 Sec</button>
-            </div>
-            </div>
+        <div className="flex-wrap w-full overflow-x-hidden">
+    <h1 className="text-3xl font-mono text-center my-2">Youtube</h1>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-12 w-full max-w-full"> 
+        <div id="player" className="rounded-md max-w-full" />
+        <div className="w-full">
+            <YoutubeContent onVideoSelect={loadVideo} />
         </div>
+    </div>
+    <div className="m-0 flex flex-col items-center w-full"> 
+        <input
+            type="text"
+            placeholder="video link"
+            value={videoID}
+            className="m-2 bg-gray-200 outline-none border font-mono rounded px-4 py-2 w-full sm:w-1/2 lg:w-1/3"
+            onChange={e => setVideoID(e.target.value)}
+            autoComplete="false"
+        />
+        <div className="flex flex-wrap justify-center w-full">
+            <button
+                onClick={() => loadVideo(videoID)}
+                className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg text-white border border-white font-serif rounded bg-blue-500"
+            >
+                Load video
+            </button>
+            <button
+                onClick={startVideo}
+                className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg border border-white font-serif rounded bg-yellow-300"
+            >
+                Start video
+            </button>
+            <button
+                onClick={stopVideo}
+                className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg text-white border border-white font-serif rounded bg-red-600"
+            >
+                Stop video
+            </button>
+            <button
+                onClick={skipVideo}
+                className="btn btn-secondary mt-4 font-medium m-1 px-2 py-1 text-lg border border-white font-serif rounded bg-yellow-300"
+            >
+                Skip by 5 Sec
+            </button>
+        </div>
+    </div>
+</div>
+
+
     );
 }
 

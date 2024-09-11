@@ -51,7 +51,7 @@ function YoutubeContent({ onVideoSelect }) {
       <form onSubmit={handleSubmit}>
         <input
           id="search_field_class"
-          className="rounded-l-lg border-2 border-black w-1/2 min-h-10 py-3 px-6 focus:outline-none text-md"
+          className="rounded-l-lg border-2 border-black w-1/2 min-h-10 py-3 px-4 focus:outline-none text-md"
           type="search"
           name="search"
           placeholder="Search Videos . . ."

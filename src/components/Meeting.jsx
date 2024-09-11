@@ -51,6 +51,7 @@ export function Meeting() {
 
     async function handelSendChannelStatusChange(e) {
         console.log({ localChannel });
+        console.log(e);
         if (localChannel) {
             const state = localChannel.readyState;
             console.log({ 'state': localChannel.readyState });
@@ -59,7 +60,14 @@ export function Meeting() {
             } else {
                 setOption((s) => ({ ...s, disabled: true }));
             }
+            
         }
+        if(localChannel.readyState === 'open'){
+            toast.success("Everything is Fine, Lets Chat");
+        }else{
+            toast.success(localChannel.readyState.toUpperCase());
+        }
+        
     }
     function receiveChannelCallback(e) {
         const channel = e.channel;
@@ -70,7 +78,7 @@ export function Meeting() {
 
     }
     function sendMessage() {
-        if (localChannel && localChannel.readyState === 'open') {
+        if (localChannel && localChannel.readyState === 'open' && messageSend.length > 0) {
             localChannel.send(messageSend);
             let divContent = document.getElementById('chat-box');
             divContent.insertAdjacentHTML('beforeend', `
@@ -175,7 +183,7 @@ export function Meeting() {
 
 
     async function handleJoinMeeting() {
-        if(roomId.length < 1) {
+        if (roomId.length < 1) {
             toast.error("Enter Your Room Id");
             return;
         }
@@ -206,7 +214,19 @@ export function Meeting() {
         }
         // setJoined(true);
         setOption((s) => ({ ...s, joined: true }));
+
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.go(1);
+        };
     }
+    useEffect(() => {
+        const onConfirmRefresh = function (event) {
+            event.preventDefault();
+            return event.returnValue = "Are you sure you want to leave the page?";
+          }  
+          window.addEventListener("beforeunload", onConfirmRefresh, { capture: true });
+    },[]);
     function sendFiles(file) {
         // decide the chunks to transfer in one go
         socketDetail.emit('fileOptions', {
@@ -266,7 +286,7 @@ export function Meeting() {
         // connecting to server - socket;
         // connecting to socket and sending the meetingID == socket , signalingServer
         // const URL = 'http://localhost:5006'
-        const URL = import.meta.env.VITE_SEVER_API; 
+        const URL = import.meta.env.VITE_SEVER_API;
         const socketIo = io(URL, {
             transports: ['websocket', 'polling', 'flashsocket'],
         });
@@ -390,6 +410,7 @@ export function Meeting() {
         }
         setTimeout(() => {
             navigate('/');
+            location.reload();
         }, 400);
     }
 
@@ -487,7 +508,7 @@ export function Meeting() {
                     loading='lazy'
                     className='w-48 sm:w-72' />
                 <h3 className='text-xl italic'>Join the Meeting</h3>
-                <input placeholder='Enter Room Id' className="file-input text-lg font-serif m-4 px-2" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
+                <input placeholder='Enter Room Id' className="file-input text-lg font-serif m-4 px-2" value={roomId} onChange={(e) => setRoomId(e.target.value)} />
                 <button onClick={handleJoinMeeting} className='text-lg border font-mono rounded bg-blue-600 text-white px-3 py-2'>Join Now!</button>
                 {/* {roomId && <div className='flex justify-center cursor-pointer' onClick={handleInvitationLink}  >
                     <span className="text-xs sm:text-lg font-serif mt-3 bg-pink-200 text-center rounded px-4 opacity-65">
@@ -529,57 +550,99 @@ export function Meeting() {
                 </div>
 
                 <div className="bg-white p-6 shadow-lg rounded-md">
-                    <div>
-                        <div id='helloMessage'>
-                            <h1 className="text-3xl font-mono text-start">Messenger</h1>
+                    <div className="p-5 max-w-lg mx-auto bg-gray-100 rounded-lg shadow-lg">
+                        <div id='helloMessage' className="mb-6">
+                            <h1 className="text-3xl font-mono text-start text-gray-800">Messenger</h1>
                             <button onClick={handelSendChannelStatusChange}
-                                className="font-medium px-2 py-1 text-lg text-white border border-white font-serif rounded bg-green-500"
-                            >Is Connected</button>
-                        </div>
-                        <input type='text' name="message" disabled={option.disabled} value={messageSend}
-                            onChange={(e) => setMessageSend(e.target.value)}
-                            className="bg-gray-200 outline-none border font-mono rounded px-5 py-2 w-1/4"
-                            autoComplete='false'
-                        />
-                        <button onClick={sendMessage} disabled={option.disabled}
-                            className="mx-2 font-medium px-2 py-1 text-lg text-white border border-white font-serif rounded bg-blue-500"
-                        >Send Message</button>
-
-                    </div>
-                    <div>
-                        <div className='flex space-x-4 mt-4'>
-                            <div className="text-lg font-serif">Send Any Type File P2P</div>
-                            <input type="file" onChange={handleFileInput} className="file-input text-lg font-serif" />
-                            <button onClick={() => sendFiles(selectedFile)} disabled={!selectedFile}
-                                className={`btn btn-primary font-medium text-lg border font-serif rounded ${selectedFile && 'bg-green-400 border-none'}`}
-                            >Send File
+                                className="font-medium px-4 py-2 text-lg text-white border border-transparent rounded bg-green-500 hover:bg-green-600 transition-all my-3"
+                            >
+                                Is Connected
                             </button>
-                            {option.isFileReady && (
-                                <button onClick={handleDownload} className="btn btn-secondary m-1 font-medium text-lg border-none px-2 font-serif rounded bg-blue-500 text-white">
+                        </div>
+
+                        <div className="flex flex-col md:flex-row items-center gap-4">
+                            <input
+                                type='text'
+                                name="message"
+                                disabled={option.disabled}
+                                value={messageSend}
+                                onChange={(e) => setMessageSend(e.target.value)}
+                                className="bg-gray-200 outline-none border border-gray-300 font-mono rounded px-4 py-2 w-4/5 md:flex-1 transition-all focus:ring-2 focus:ring-blue-400"
+                                autoComplete='off'
+                                placeholder="Type your message..."
+                            />
+
+                            <button
+                                onClick={sendMessage}
+                                disabled={option.disabled}
+                                className="font-medium px-4 py-2 text-lg text-white border border-transparent rounded bg-blue-500 hover:bg-blue-600 transition-all w-4/5 md:w-auto md:ml-4"
+                            >
+                                Send Message
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="p-5 max-w-lg mx-auto bg-gray-100 rounded-lg shadow-lg space-y-6">
+                        {/* File Transfer Section */}
+                        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-4">
+                            <div className="text-lg font-serif w-full md:w-1/2">
+                                <span className="bg-pink-200 p-2 block mb-4 rounded">Send Any Type of File P2P</span>
+                                <input
+                                    type="file"
+                                    onChange={handleFileInput}
+                                    className="file-input w-full text-lg font-serif my-4 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-400"
+                                />
+                                <button
+                                    onClick={() => sendFiles(selectedFile)}
+                                    disabled={!selectedFile}
+                                    className={`font-medium text-lg px-4 py-2 rounded ${selectedFile ? 'bg-green-400 text-white' : 'bg-gray-300'} transition-all`}
+                                >
+                                    Send File
+                                </button>
+                                {option.isFileReady && (
+                                <button
+                                    onClick={handleDownload}
+                                    className="font-medium my-3 text-lg px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-all"
+                                >
                                     Download Received File
                                 </button>
                             )}
+                            </div>
+
+                            
+                        </div>
+
+                        {/* Recording Section */}
+                        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mt-4">
+                            {!option.isRecording ? (
+                                <button
+                                    onClick={RecordWindow}
+                                    className="font-medium px-4 py-2 text-lg text-white rounded bg-green-600 hover:bg-green-700 transition-all"
+                                >
+                                    Start Recording
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={StopRecord}
+                                    className="font-medium px-4 py-2 text-lg text-white rounded bg-red-600 hover:bg-red-700 transition-all"
+                                >
+                                    Stop
+                                </button>
+                            )}
+
+                            <select
+                                onChange={handleRecordOption}
+                                className="font-mono text-md rounded bg-blue-200 p-2"
+                            >
+                                <option value="localStream" defaultValue>Record Myself</option>
+                                <option value="remoteStream">Record Other</option>
+                            </select>
                         </div>
                     </div>
-                    <div className='flex space-x-4 mt-4'>
-                        {!option.isRecording ? (
-                            <button onClick={RecordWindow}
-                                className={`btn btn-secondary mt-4 font-medium px-2 py-1 text-lg text-white border  border-white font-serif rounded bg-green-600`}
-                            >Start Recording</button>
-                        ) : (
-                            <button onClick={StopRecord}
-                                className={`btn btn-secondary mt-4 font-medium px-2 py-1 text-lg text-white border  border-white font-serif rounded bg-red-600`}
-                            >Stop</button>
-                        )}
 
-                        <select onChange={handleRecordOption} className="mt-4 font-mono text-md rounded bg-blue-200">
-                            <option name="localStream" value={'localStream'} defaultValue={true}>Record Myself</option>
-                            <option name="remoteStream" value={'remoteStream'}>Record Other</option>
-                        </select>
-                    </div>
 
                 </div>
-                <div className="bg-white p-6 shadow-lg rounded-md">
+                <div className="p-5 max-w-lg mx-auto bg-gray-100 rounded-lg shadow-lg space-y-6">
                     <div ref={chatBoxRef} className="chat-container h-64 overflow-y-auto p-4 border border-gray-300 rounded-md">
                         <table className='w-full text-left border-collapse'>
                             <tbody className='align-baseline' id='chat-box'>

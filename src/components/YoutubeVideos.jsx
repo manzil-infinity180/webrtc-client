@@ -110,7 +110,7 @@ function YoutubeVideos({peerConnection}) {
             type="text"
             placeholder="video link"
             value={videoID}
-            className="m-2 bg-gray-200 outline-none border font-mono rounded px-4 py-2 w-full sm:w-1/2 lg:w-1/3"
+            className="bg-gray-200 outline-none border border-gray-300 font-mono rounded px-4 py-2 w-4/5 my-1 md:flex-1 md:w-1/4 md:my-3 transition-all focus:ring-2 focus:ring-blue-400"
             onChange={e => setVideoID(e.target.value)}
             autoComplete="false"
         />

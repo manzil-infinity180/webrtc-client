@@ -60,13 +60,15 @@ export function Home() {
 
             <div className="bg-white shadow-lg rounded-md flex justify-center mx-10 my-6 md:mx-25 lg:mx-40 flex-wrap">
                 <div className="flex justify-start space-x-4 mb-4">
-                    <img src={one_many}
+                    <img src={"https://lh3.googleusercontent.com/3zkP2SYe7yYoKKe47bsNe44yTgb4Ukh__rBbwXwgkjNRe4PykGG409ozBxzxkrubV7zHKjfxq6y9ShogWtMBMPyB3jiNps91LoNH8A=s500"}
                         className="w-80 h-52 m-4 md:w-96 md:h-60" loading="lazy"/>
                 </div>
                 <div className="mx-12 flex justify-center flex-col mb-6">
-                    <h4 className="m-1 text-xl text-center mt-4 font-mono bg-pink-100 opacity-85 rounded">One to Many - Video/Audio</h4>
-                    <p className="mt-0 pt-0 text-center font-serif">Using GetStream Video/Audio SDK</p>
-                    <button className="mx-12 my-4 text-xl font-serif text-white rounded border bg-violet-500 py-1">Lets Go Friend - GetStream</button>
+                    <h4 className="m-1 text-xl text-center mt-4 font-mono bg-pink-100 opacity-85 rounded">Free Youtube - Search & URL</h4>
+                    <p className="mt-0 pt-0 text-center font-serif">I guess you will not get Any ADs</p>
+                    <button className="mx-12 my-4 text-xl font-serif text-white rounded border bg-violet-500 py-1"
+                    onClick={() => navigate(`/ytContent`)}
+                    >Lets Watch Youtube</button>
                 </div>
             </div>
 

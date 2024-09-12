@@ -59,8 +59,7 @@ export function Meeting() {
                 setOption((s) => ({ ...s, disabled: false }));
             } else {
                 setOption((s) => ({ ...s, disabled: true }));
-            }
-            
+            }   
         }
         if(localChannel.readyState === 'open'){
             toast.success("Everything is Fine, Lets Chat");

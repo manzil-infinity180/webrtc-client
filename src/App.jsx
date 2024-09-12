@@ -10,6 +10,7 @@ import YoutubeContent from './components/YoutubeContent';
 import MonacoCodeEditor from './components/MonacoCodeEditor';
 import Interview from './components/Interview';
 import ZoomSdk from './components/ZoomSdk';
+import WatchYoutube from './components/WatchYoutube';
 // import './index.css'
 function App() {
   const router = createBrowserRouter([
@@ -38,8 +39,8 @@ function App() {
       element: <YoutubeVideos />
     },
     {
-      path:'/content',
-      element: <YoutubeContent />
+      path:'/ytContent',
+      element: <WatchYoutube />
     },
     {
       path:'/code',

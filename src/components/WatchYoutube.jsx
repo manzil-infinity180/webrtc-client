@@ -30,7 +30,6 @@ function WatchYoutube() {
         const data = await res.json();
         console.log(data);
         setSearchContent(data.items);
-        setSearchTerm("");
       } catch (err) {
         toast.error(err.message);
         toast.error("Exceed the free access request");

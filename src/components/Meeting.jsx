@@ -233,7 +233,7 @@ export function Meeting() {
             'filename': file.name
         });
 
-        const chunksize = 66560;
+        const chunksize = 16 * 1024;
         const fileReader = new FileReader();
         let offset = 0;
         fileReader.onload = (e) => {

@@ -218,6 +218,7 @@ export function Meeting() {
         window.onpopstate = function () {
             window.history.go(1);
         };
+        navigate(`/meeting/${roomId}`)
     }
     useEffect(() => {
         const onConfirmRefresh = function (event) {

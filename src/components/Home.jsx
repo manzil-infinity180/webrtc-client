@@ -25,7 +25,7 @@ export function Home() {
                         <h4 className="m-1 text-xl text-center mt-4 font-mono bg-blue-100 opacity-85 rounded">Peer to Peer Communication</h4>
                         <p className="mt-1 text-center font-serif">P2P call, Yt Video, Messenging and Transfer files</p>
                         <button className="text-xl font-serif rounded border bg-violet-500 text-white py-1" 
-                        onClick={() => navigate(`/meeting`)}
+                        onClick={() => navigate(`/meeting/join`)}
                         >Lets Do Peer : Peer</button>
                     </div>
                 </div>
@@ -39,7 +39,7 @@ export function Home() {
                     <h4 className="text-xl text-center mt-4 m-1 font-mono bg-yellow-100 opacity-85 rounded">Interview P2P</h4>
                     <p className="mt-1 text-center font-serif ">Collobrative Code Editor and P2P Interaction</p>
                     <button className="mx-12 my-4 text-xl font-serif rounded border bg-violet-500 text-white py-1"
-                    onClick={() => navigate(`/code`)}
+                    onClick={() => navigate(`/code/join`)}
                     >Lets Do 1:1 And Code Editor</button>
                 </div>
             </div>

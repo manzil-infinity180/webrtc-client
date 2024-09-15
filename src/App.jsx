@@ -19,7 +19,7 @@ function App() {
       element: <Home />
     },
     {
-      path: '/meeting',
+      path: '/meeting/:meetingId',
       element: <Meeting />
     },
     {
@@ -43,7 +43,7 @@ function App() {
       element: <WatchYoutube />
     },
     {
-      path:'/code',
+      path:'/code/:meetingId',
       element: <Interview />
     },
     {

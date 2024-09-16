@@ -41,6 +41,7 @@ export function Meeting() {
     });
     const [roomId, setRoomId] = useState("");
     const chatBoxRef = useRef(null);
+    const [sendingRate, setSendingRate] = useState("");
     useEffect(() => {
         // Scroll to the bottom when a new message is added
         if (chatBoxRef.current) {
@@ -234,7 +235,7 @@ export function Meeting() {
             'filename': file.name
         });
 
-        const chunksize = 16 * 1024;
+        const chunksize = 256 * 1024;
         const fileReader = new FileReader();
         let offset = 0;
         fileReader.onload = (e) => {
@@ -243,8 +244,12 @@ export function Meeting() {
 
             offset += buffer.byteLength;
             console.log("file transfer " + offset / 1024);
+            setSendingRate(`${(offset / 1024) / 1024} Mb` );
             if (offset < file.size) {
-                readSlice(offset); // read next chunks 
+                // readSlice(offset); // read next chunks 
+                setTimeout(() => {
+                    readSlice(offset);
+                },100);
             } else {
                 fileTransferChannel.send('EOF');  // end of file 
                 setSelectedFile(null);
@@ -599,6 +604,7 @@ export function Meeting() {
                                 >
                                     Send File
                                 </button>
+                                {sendingRate && <p>Sending Rate : {sendingRate}</p>}
                                 {option.isFileReady && (
                                 <button
                                     onClick={handleDownload}

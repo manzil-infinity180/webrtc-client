@@ -215,10 +215,10 @@ export function Meeting() {
         // setJoined(true);
         setOption((s) => ({ ...s, joined: true }));
 
-        window.history.pushState(null, null, window.location.href);
-        window.onpopstate = function () {
-            window.history.go(1);
-        };
+        // window.history.pushState(null, null, window.location.href);
+        // window.onpopstate = function () {
+        //     window.history.go(1);
+        // };
         navigate(`/meeting/${roomId}`)
     }
     useEffect(() => {

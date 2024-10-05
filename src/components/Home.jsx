@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import p2p from "../utils/p2p_image.png";
 import code_editor from "../utils/code_editor.png";
 import one_many from "../utils/one_many.png";
+import Navbar from "./Navbar";
 export function Home() {
   const [meetingId, setMeetingId] = useState("");
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export function Home() {
   }
   return (
     <>
+      <Navbar></Navbar>
       <div className="bg-gray-100 flex flex-col flex-wrap">
         <div className="flex justify-center mt-4 text-2xl sm:text-3xl font-serif">
           Real Time Interactive Portal

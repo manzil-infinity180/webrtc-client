@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Navbar from "./Navbar";
 
 function YoutubeContent({ onVideoSelect }) {
   const [searchContent, setSearchContent] = useState("");
@@ -19,27 +20,29 @@ function YoutubeContent({ onVideoSelect }) {
   async function handleSubmit(e) {
     e.preventDefault();
     if (searchTerm.length > 0) {
-      try{
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?q=${searchTerm}&key=${ytKey}&part=snippet&type=video&maxResults=20&order=relevance`);
+      try {
+        const res = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?q=${searchTerm}&key=${ytKey}&part=snippet&type=video&maxResults=20&order=relevance`
+        );
         const data = await res.json();
         console.log(data);
         setSearchContent(data.items);
-      }catch(err){
+      } catch (err) {
         toast.error(err.message);
         toast.error("Exceed the free access request");
       }
-      
+
       // data.items.id.videoId // important
       // data.items.snippet
     }
   }
-  
+
   function handleLoadVideo(videoID) {
     console.log(videoID);
-    if(videoID){
+    if (videoID) {
       const fullVideoUrl = `https://www.youtube.com/watch?v=${videoID}`;
       onVideoSelect(fullVideoUrl);
-      toast.success('Loading selected video');
+      toast.success("Loading selected video");
     } else {
       toast.error("Invalid videoId");
     }
@@ -47,6 +50,7 @@ function YoutubeContent({ onVideoSelect }) {
 
   return (
     <>
+      <Navbar></Navbar>
       <form onSubmit={handleSubmit}>
         <input
           id="search_field_class"
@@ -56,10 +60,11 @@ function YoutubeContent({ onVideoSelect }) {
           placeholder="Search Videos . . ."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          autoComplete='off'
+          autoComplete="off"
         />
         <button className="rounded-r-lg border-2 border-black bg-black text-white px-6 py-3 text-md font-semibold hover:bg-gray-800 focus:outline-none transition-colors">
-          Search</button>
+          Search
+        </button>
       </form>
       <div className="content grid sm:grid-cols-4 justify-center gap-3 p-3">
         {/* {searchContent &&
@@ -93,9 +98,15 @@ function YoutubeContent({ onVideoSelect }) {
 
 export default YoutubeContent;
 
-function ContentView({ title, thumbnails, channelTitle, videoID, onVideoSelect }) {
+function ContentView({
+  title,
+  thumbnails,
+  channelTitle,
+  videoID,
+  onVideoSelect,
+}) {
   return (
-    <div 
+    <div
       className="border-solid border-2 border-gray-200 rounded-lg overflow-hidden shadow-lg bg-white cursor-pointer"
       onClick={() => onVideoSelect(videoID)}
     >
@@ -103,10 +114,12 @@ function ContentView({ title, thumbnails, channelTitle, videoID, onVideoSelect }
         src={thumbnails}
         alt={title}
         className="w-full h-full object-full"
-        style={{ width: '360px', height: '180px' }}
+        style={{ width: "360px", height: "180px" }}
       />
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">{title}</h2>
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {title}
+        </h2>
         <p className="text-sm text-gray-600">{channelTitle}</p>
       </div>
     </div>

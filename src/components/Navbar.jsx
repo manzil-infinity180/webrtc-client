@@ -1,19 +1,22 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handlelogin = () => {
     navigate("/login");
   };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <header className="bg-white shadow-md top-0 sticky">
       <div className="container mx-auto flex flex-wrap p-5 justify-between items-center">
         <a
           href="/"
-          className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0"
+          className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0 no-underline"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -27,39 +30,34 @@ const Navbar = () => {
           >
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
           </svg>
-          <span className="ml-3 text-2xl font-bold">WebRTC-Client</span>
+          <span className="ml-3 text-2xl font-bold">ZoomXF</span>
         </a>
-        <nav className="flex items-center space-x-5 text-base">
+        <nav className="flex justify-between items-center space-x-5 text-base">
           <a
             href="/"
-            className="text-gray-700 hover:text-indigo-600 transition duration-200"
+            className={`${
+              isActive("/") ? "text-blue-600" : "text-gray-700"
+            } no-underline hover:text-indigo-600 transition duration-200`}
           >
             Home
           </a>
           <a
-            href="https://github.com/manzil-infinity180/webrtc-client"
-            className="text-gray-700 hover:text-indigo-600 transition duration-200"
+            href="/signup"
+            className={`${
+              isActive("/signup") ? "text-blue-600" : "text-gray-700"
+            } no-underline hover:text-indigo-600 transition duration-200`}
           >
-            About Us
+            SignUp
+          </a>
+          <a
+            href="/login"
+            className={`${
+              isActive("/login") ? "text-blue-600" : "text-gray-700"
+            } no-underline hover:text-indigo-600 transition duration-200`}
+          >
+            Login
           </a>
         </nav>
-        <button
-          class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0 cursor-pointer"
-          onClick={handlelogin}
-        >
-          Login
-          <svg
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            class="w-4 h-4 ml-1"
-            viewBox="0 0 24 24"
-          >
-            <path d="M5 12h14M12 5l7 7-7 7"></path>
-          </svg>
-        </button>
       </div>
     </header>
   );

@@ -3,7 +3,6 @@ import Navbar from "./Navbar";
 const Signup = () => {
   return (
     <>
-      <Navbar />
       <div className="flex flex-col items-center justify-center mt-20 ">
         <div className="bg-white p-8 rounded-lg shadow-lg w-96 text-center">
           <h1 className="text-2xl font-bold mb-6">SignUp to WEBRTC-CLIENT</h1>

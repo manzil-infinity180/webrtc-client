@@ -12,6 +12,7 @@ import Interview from "./components/Interview";
 import ZoomSdk from "./components/ZoomSdk";
 import WatchYoutube from "./components/WatchYoutube";
 import Login from "./components/Login";
+import Signup from "./components/Signup";
 // import './index.css'
 function App() {
   const router = createBrowserRouter([
@@ -54,6 +55,10 @@ function App() {
     {
       path: "/login",
       element: <Login></Login>,
+    },
+    {
+      path: "/signup",
+      element: <Signup></Signup>,
     },
   ]);
 

@@ -13,7 +13,7 @@ export function Home() {
   }
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
       <div className="bg-gray-100 flex flex-col flex-wrap">
         <div className="flex justify-center mt-4 text-2xl sm:text-3xl font-serif">
           Real Time Interactive Portal

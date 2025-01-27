@@ -1,5 +1,5 @@
 import { Video, MessageSquare, Code2, Youtube, Monitor, Users, Star, Github, Twitter } from 'lucide-react'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function First() {
    const navigate = useNavigate();
@@ -169,10 +169,10 @@ export default function First() {
                 Building the future of real-time communication with WebRTC technology.
               </p>
               <div className="flex gap-4">
-                <Link href="https://github.com/manzil-infinity180/webrtc-client" className="text-gray-300 hover:text-white">
+                <Link to="https://github.com/manzil-infinity180/webrtc-client" className="text-gray-300 hover:text-white">
                   <Github className="h-6 w-6" />
                 </Link>
-                <Link href="https://x.com/manzil_rahul" className="text-gray-300 hover:text-white">
+                <Link to="https://x.com/manzil_rahul" className="text-gray-300 hover:text-white">
                   <Twitter className="h-6 w-6" />
                 </Link>               
               </div>
@@ -184,7 +184,7 @@ export default function First() {
                 <ul className="space-y-2">
                   {column.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <Link href={link.href} className="text-gray-300 hover:text-white">
+                      <Link to={link.href} className="text-gray-300 hover:text-white">
                         {link.label}
                       </Link>
                     </li>

@@ -1,5 +1,4 @@
-import { Video, Share2, MessageSquare, Code2, Youtube, Monitor, Users, Star, Github, Twitter, Linkedin, Facebook } from 'lucide-react'
-import Link from "next/link"
+import { Video, MessageSquare, Code2, Youtube, Monitor, Users, Star, Github, Twitter } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 
 export default function First() {

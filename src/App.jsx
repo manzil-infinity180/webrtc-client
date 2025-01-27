@@ -13,11 +13,12 @@ import ZoomSdk from "./components/ZoomSdk";
 import WatchYoutube from "./components/WatchYoutube";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import First from "./components/First";
 // import './index.css'
 function App() {
   const router = createBrowserRouter([
     {
-      path: "*",
+      path: "/home",
       element: <Home />,
     },
     {
@@ -54,15 +55,20 @@ function App() {
     },
     {
       path: "/login",
-      element: <Login></Login>,
+      element: <Login />,
     },
     {
       path: "/signup",
-      element: <Signup></Signup>,
+      element: <Signup />,
+    },
+    {
+      path: "*",
+      element: <First />
     },
   ]);
-
+  console.log(import.meta.env.VITE_SEVER_API)
   return (
+    
     <>
       <RouterProvider router={router} />
       <Toaster

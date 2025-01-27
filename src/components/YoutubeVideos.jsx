@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import YoutubeContent from "./YoutubeContent";
-import Navbar from "./Navbar";
 
 function YoutubeVideos({ peerConnection }) {
   const [videoID, setVideoID] = useState("");
@@ -109,7 +108,6 @@ function YoutubeVideos({ peerConnection }) {
 
   return (
     <>
-      <Navbar></Navbar>
       <div className="flex-wrap w-full overflow-x-hidden">
         <h1 className="text-3xl font-mono text-center my-2">Youtube</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-12 w-full max-w-full">

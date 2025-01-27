@@ -1,6 +1,5 @@
 import ZoomMtgEmbedded from "@zoom/meetingsdk/embedded";
 import { useState } from "react";
-import Navbar from "./Navbar";
 
 function ZoomSdk() {
   const [values, setValues] = useState({
@@ -81,7 +80,6 @@ function ZoomSdk() {
 
   return (
     <>
-      <Navbar></Navbar>
       {values.visibility && (
         <div className="flex flex-col justify-center items-center py-1 bg-gray-50 min-h-screen">
           <div className="w-full max-w-lg bg-white shadow-lg rounded-lg p-8">

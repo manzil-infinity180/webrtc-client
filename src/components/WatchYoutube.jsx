@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import Navbar from "./Navbar";
 
 export const YT_REGEX =
   /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:m\.)?(?:youtu(?:be)?\.com\/(?:v\/|embed\/|watch(?:\/|\?v=))|youtu\.be\/)((?:\w|-){11})(?:\S+)?$/;
@@ -52,7 +51,6 @@ function WatchYoutube() {
 
   return (
     <>
-      <Navbar></Navbar>
       <div className="flex justify-center">
         <span className="text-2xl sm:text-3xl font-serif mb-1 mt-0 bg-pink-200 text-center rounded px-4">
           Free Youtube , I guess No ADS

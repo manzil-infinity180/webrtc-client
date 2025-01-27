@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import Navbar from "./Navbar";
 
 function YoutubeContent({ onVideoSelect }) {
   const [searchContent, setSearchContent] = useState("");
@@ -50,7 +49,6 @@ function YoutubeContent({ onVideoSelect }) {
 
   return (
     <>
-      <Navbar></Navbar>
       <form onSubmit={handleSubmit}>
         <input
           id="search_field_class"

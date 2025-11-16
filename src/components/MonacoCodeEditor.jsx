@@ -5,115 +5,109 @@ import Editor from '@monaco-editor/react';
 import { useEffect, useMemo, useState } from 'react';
 import LanguageOptions from './LanguageOptions';
 
-function MonacoCodeEditor() {
+function MonacoCodeEditor({ onSubmit, loading }) {
     const [selectedOption, setSelectedOption] = useState({
         language: 'javascript',
         id: 63
     });
     const [code, setCode] = useState("");
-    const ydoc = useMemo(
-        () => new Y.Doc(), []);
+    const ydoc = useMemo(() => new Y.Doc(), []);
     const [editor, setEditor] = useState(null);
     const [provider, setProvider] = useState(null);
     const [binding, setBinding] = useState(null);
-    // this effect manages the lifetime of the Yjs document and the provider
+
+    // Manage Yjs document and provider lifetime
     useEffect(() => {
-        const provider = new WebsocketProvider('ws://localhost:5173', 'monaco-react-2', ydoc);
-        setProvider(provider);
-        console.log({ provider });
+        const wsProvider = new WebsocketProvider(
+            'ws://localhost:5173', 
+            'monaco-react-2', 
+            ydoc
+        );
+        setProvider(wsProvider);
+        
         return () => {
-            provider?.destroy()
-            ydoc.destroy()
-        }
+            wsProvider?.destroy();
+            ydoc.destroy();
+        };
     }, [ydoc]);
 
-    // this effect manages the lifetime of the editor binding
+    // Manage editor binding lifetime
     useEffect(() => {
         if (provider === null || editor === null) {
             return;
         }
-        console.log('reached', provider);
-        const binding = new MonacoBinding(ydoc.getText(), editor.getModel(), new Set([editor]), provider.awareness)
-        console.log({
-            'getText': ydoc.getText(),
-            'getModel': editor.getModel(),
-            'awarness': provider.awareness,
-            binding
-        });
-
-        setBinding(binding)
+        
+        const monacoBinding = new MonacoBinding(
+            ydoc.getText(), 
+            editor.getModel(), 
+            new Set([editor]), 
+            provider.awareness
+        );
+        
+        setBinding(monacoBinding);
+        
         return () => {
-            binding.destroy()
-        }
+            monacoBinding.destroy();
+        };
     }, [ydoc, provider, editor]);
+
     function handleChangeCode(value) {
         setCode(value);
     }
-    async function handleSubmitCode() {
-        const formData = {
-            language_id: selectedOption.id,
-            source_code: btoa(code),
-            stdin: btoa("rahulc"),
-        }
-        const url = `${import.meta.env.VITE_RAPID_API_URL}?fields=*`;
-        const options = {
-            method: 'POST',
-            body: JSON.stringify(formData),
-            headers: {
-                'x-rapidapi-key': import.meta.env.VITE_RAPID_API_KEY,
-                'x-rapidapi-host': import.meta.env.VITE_RAPID_API_HOST,
-                'Content-Type': 'application/json'
-            },
-            credentials :'include',
-        };
 
-        // fetch(process.env.REACT_APP_RAPID_API_URL,option).then((res) => {
-        //     console.log(res.data);
-        // });
-        try {
-            const response = await fetch(url, options);
-            const result = await response.json();
-            console.log(result);
-            await checkStatus(result.token)
-        } catch (error) {
-            console.error(error);
+    function handleSubmitCode() {
+        if (!code.trim()) {
+            alert('Please write some code before submitting!');
+            return;
+        }
+        
+        // Call the parent component's onSubmit function
+        if (onSubmit) {
+            onSubmit(code, selectedOption.language);
         }
     }
-    async function checkStatus(token) {
-        const url = `${import.meta.env.VITE_RAPID_API_URL}/${token}?base64_encoded=true&fields=*`;
-        const options = {
-            method: 'GET',
-            headers: {
-                'x-rapidapi-key': import.meta.env.VITE_RAPID_API_KEY,
-                'x-rapidapi-host': import.meta.env.VITE_RAPID_API_HOST,
-            },
-            credentials :'include'
-        };
 
-        try {
-            const response = await fetch(url, options);
-            const result = await response.json();
-            console.log(result);
-            const statusCode = result.status?.id;
-            console.log(statusCode);
-        } catch (error) {
-            console.error(error);
-        }
-    }
     return (
-        <div>
-            <div className='flex justify-center my-4'>
-            <LanguageOptions setSelectedOption={setSelectedOption} selectedOption={selectedOption.language} />
-            <button onClick={handleSubmitCode} className='mt-4 font-mono text-md rounded bg-blue-200 py-2 border'>Submit Code</button>
+        <div className="bg-white rounded-lg shadow-md p-6">
+            <div className='flex justify-between items-center mb-4'>
+                <h2 className="text-xl font-semibold text-gray-900">Code Editor</h2>
+                <div className='flex items-center gap-4'>
+                    <LanguageOptions 
+                        setSelectedOption={setSelectedOption} 
+                        selectedOption={selectedOption.language} 
+                    />
+                    <button 
+                        onClick={handleSubmitCode} 
+                        disabled={loading}
+                        className='font-semibold text-lg rounded-lg bg-green-600 hover:bg-green-700 text-white px-6 py-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'>
+                        {loading ? 'Evaluating...' : 'Submit Code'}
+                    </button>
+                </div>
             </div>
             
-            <Editor height="90vh" defaultValue="// some comment" defaultLanguage="javascript"
-                onMount={editor => { setEditor(editor) }}
-                onChange={handleChangeCode}
-                language={selectedOption.language}
-                theme='vs-dark'
-            />
+            <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                <Editor 
+                    height="70vh" 
+                    defaultValue="// Write your solution here\n" 
+                    defaultLanguage="javascript"
+                    onMount={editor => { setEditor(editor) }}
+                    onChange={handleChangeCode}
+                    language={selectedOption.language}
+                    theme='vs-dark'
+                    options={{
+                        minimap: { enabled: true },
+                        fontSize: 14,
+                        lineNumbers: 'on',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        tabSize: 2,
+                    }}
+                />
+            </div>
             
+            <div className="mt-4 text-sm text-gray-600">
+                <p>💡 <strong>Tip:</strong> Write clean, well-commented code. Consider edge cases and optimize for both time and space complexity.</p>
+            </div>
         </div>
     );
 }

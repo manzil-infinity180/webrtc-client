@@ -3,117 +3,200 @@ import { WebsocketProvider } from 'y-websocket';
 import { MonacoBinding } from 'y-monaco';
 import Editor from '@monaco-editor/react';
 import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import LanguageOptions from './LanguageOptions';
 
-function MonacoCodeEditor() {
+function MonacoCodeEditor({ onSubmit, loading }) {
+    const { meetingId } = useParams(); // Get room ID from URL
     const [selectedOption, setSelectedOption] = useState({
         language: 'javascript',
         id: 63
     });
     const [code, setCode] = useState("");
-    const ydoc = useMemo(
-        () => new Y.Doc(), []);
+    const ydoc = useMemo(() => new Y.Doc(), []);
     const [editor, setEditor] = useState(null);
     const [provider, setProvider] = useState(null);
     const [binding, setBinding] = useState(null);
-    // this effect manages the lifetime of the Yjs document and the provider
-    useEffect(() => {
-        const provider = new WebsocketProvider('ws://localhost:5173', 'monaco-react-2', ydoc);
-        setProvider(provider);
-        console.log({ provider });
-        return () => {
-            provider?.destroy()
-            ydoc.destroy()
-        }
-    }, [ydoc]);
+    const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
-    // this effect manages the lifetime of the editor binding
+    // Manage Yjs document and provider lifetime
+    useEffect(() => {
+        if (!meetingId) {
+            console.warn('No meeting ID provided for collaborative editing');
+            return;
+        }
+
+        // Connect to the same server but on /yjs path
+        const wsUrl = import.meta.env.VITE_SEVER_API || 'http://localhost:5006';
+        const wsProtocol = wsUrl.startsWith('https') ? 'wss' : 'ws';
+        const wsHost = wsUrl.replace('http://', '').replace('https://', '');
+        
+        // Use meeting ID as the room name for Yjs
+        const roomName = `interview-room-${meetingId}`;
+        const yjsUrl = `${wsProtocol}://${wsHost}/yjs`;
+        
+        console.log(`Connecting to Yjs: ${yjsUrl} | Room: ${roomName}`);
+        
+        const wsProvider = new WebsocketProvider(
+            yjsUrl,
+            roomName,
+            ydoc
+        );
+
+        // Connection status listeners
+        wsProvider.on('status', ({ status }) => {
+            console.log('Yjs connection status:', status);
+            setConnectionStatus(status);
+        });
+
+        wsProvider.on('sync', (isSynced) => {
+            console.log('Yjs synced:', isSynced);
+        });
+
+        setProvider(wsProvider);
+        
+        return () => {
+            console.log('Cleaning up Yjs connection');
+            wsProvider?.destroy();
+            ydoc.destroy();
+        };
+    }, [ydoc, meetingId]);
+
+    // Manage editor binding lifetime
     useEffect(() => {
         if (provider === null || editor === null) {
             return;
         }
-        console.log('reached', provider);
-        const binding = new MonacoBinding(ydoc.getText(), editor.getModel(), new Set([editor]), provider.awareness)
-        console.log({
-            'getText': ydoc.getText(),
-            'getModel': editor.getModel(),
-            'awarness': provider.awareness,
-            binding
-        });
-
-        setBinding(binding)
+        
+        console.log('Setting up Monaco binding with Yjs');
+        
+        const ytext = ydoc.getText('monaco');
+        const monacoBinding = new MonacoBinding(
+            ytext,
+            editor.getModel(), 
+            new Set([editor]), 
+            provider.awareness
+        );
+        
+        setBinding(monacoBinding);
+        
         return () => {
-            binding.destroy()
-        }
+            monacoBinding.destroy();
+        };
     }, [ydoc, provider, editor]);
+
     function handleChangeCode(value) {
         setCode(value);
     }
-    async function handleSubmitCode() {
-        const formData = {
-            language_id: selectedOption.id,
-            source_code: btoa(code),
-            stdin: btoa("rahulc"),
-        }
-        const url = `${import.meta.env.VITE_RAPID_API_URL}?fields=*`;
-        const options = {
-            method: 'POST',
-            body: JSON.stringify(formData),
-            headers: {
-                'x-rapidapi-key': import.meta.env.VITE_RAPID_API_KEY,
-                'x-rapidapi-host': import.meta.env.VITE_RAPID_API_HOST,
-                'Content-Type': 'application/json'
-            },
-            credentials :'include',
-        };
 
-        // fetch(process.env.REACT_APP_RAPID_API_URL,option).then((res) => {
-        //     console.log(res.data);
-        // });
-        try {
-            const response = await fetch(url, options);
-            const result = await response.json();
-            console.log(result);
-            await checkStatus(result.token)
-        } catch (error) {
-            console.error(error);
+    function handleSubmitCode() {
+        if (!code.trim()) {
+            alert('Please write some code before submitting!');
+            return;
+        }
+        
+        // Call the parent component's onSubmit function
+        if (onSubmit) {
+            onSubmit(code, selectedOption.language);
         }
     }
-    async function checkStatus(token) {
-        const url = `${import.meta.env.VITE_RAPID_API_URL}/${token}?base64_encoded=true&fields=*`;
-        const options = {
-            method: 'GET',
-            headers: {
-                'x-rapidapi-key': import.meta.env.VITE_RAPID_API_KEY,
-                'x-rapidapi-host': import.meta.env.VITE_RAPID_API_HOST,
-            },
-            credentials :'include'
-        };
 
-        try {
-            const response = await fetch(url, options);
-            const result = await response.json();
-            console.log(result);
-            const statusCode = result.status?.id;
-            console.log(statusCode);
-        } catch (error) {
-            console.error(error);
+    // Get status color
+    const getStatusColor = () => {
+        switch (connectionStatus) {
+            case 'connected':
+                return 'bg-green-500';
+            case 'connecting':
+                return 'bg-yellow-500';
+            default:
+                return 'bg-red-500';
         }
-    }
+    };
+
+    const getStatusText = () => {
+        switch (connectionStatus) {
+            case 'connected':
+                return 'Synced';
+            case 'connecting':
+                return 'Connecting...';
+            default:
+                return 'Disconnected';
+        }
+    };
+
     return (
-        <div>
-            <div className='flex justify-center my-4'>
-            <LanguageOptions setSelectedOption={setSelectedOption} selectedOption={selectedOption.language} />
-            <button onClick={handleSubmitCode} className='mt-4 font-mono text-md rounded bg-blue-200 py-2 border'>Submit Code</button>
+        <div className="bg-white rounded-lg shadow-md p-6">
+            <div className='flex justify-between items-center mb-4'>
+                <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-semibold text-gray-900">Code Editor</h2>
+                    {/* Connection Status Indicator */}
+                    <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${getStatusColor()} animate-pulse`}></div>
+                        <span className="text-sm text-gray-600">{getStatusText()}</span>
+                    </div>
+                </div>
+                <div className='flex items-center gap-4'>
+                    <LanguageOptions 
+                        setSelectedOption={setSelectedOption} 
+                        selectedOption={selectedOption.language} 
+                    />
+                    <button 
+                        onClick={handleSubmitCode} 
+                        disabled={loading}
+                        className='font-semibold text-lg rounded-lg bg-green-600 hover:bg-green-700 text-white px-6 py-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'>
+                        {loading ? 'Evaluating...' : 'Submit Code'}
+                    </button>
+                </div>
             </div>
             
-            <Editor height="90vh" defaultValue="// some comment" defaultLanguage="javascript"
-                onMount={editor => { setEditor(editor) }}
-                onChange={handleChangeCode}
-                language={selectedOption.language}
-                theme='vs-dark'
-            />
+            {connectionStatus !== 'connected' && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                        ⚠️ Collaborative editing is {connectionStatus}. Changes may not sync in real-time.
+                    </p>
+                </div>
+            )}
             
+            <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                <Editor 
+                    height="70vh" 
+                    defaultValue="// Write your solution here
+// This editor syncs in real-time with other participants!
+
+function solution() {
+    // Your code here
+}
+" 
+                    defaultLanguage="javascript"
+                    onMount={editor => { 
+                        setEditor(editor);
+                        console.log('Monaco editor mounted');
+                    }}
+                    onChange={handleChangeCode}
+                    language={selectedOption.language}
+                    theme='vs-dark'
+                    options={{
+                        minimap: { enabled: true },
+                        fontSize: 14,
+                        lineNumbers: 'on',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        tabSize: 2,
+                        wordWrap: 'on',
+                        cursorBlinking: 'smooth',
+                    }}
+                />
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                <p className="flex items-start gap-2">
+                    <span className="text-lg">💡</span>
+                    <span>
+                        <strong>Collaborative Editing Enabled:</strong> Everyone in the room can see and edit the code in real-time. 
+                        {connectionStatus === 'connected' && ' All changes are synced!'}
+                    </span>
+                </p>
+            </div>
         </div>
     );
 }

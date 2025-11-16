@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Video } from './Video';
 import MonacoCodeEditor from './MonacoCodeEditor';
+import CheatingDetection from './CheatingDetection';
 import toast from 'react-hot-toast';
 
 let peerConnection = new RTCPeerConnection({

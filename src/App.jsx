@@ -14,6 +14,8 @@ import WatchYoutube from "./components/WatchYoutube";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import First from "./components/First";
+import CheatingDetection from "./components/CheatingDetection";
+import InterviewWithProctoring from "./components/InterviewWithProctoring";
 // import './index.css'
 function App() {
   const router = createBrowserRouter([
@@ -60,6 +62,10 @@ function App() {
     {
       path: "/signup",
       element: <Signup />,
+    },
+    {
+      path: "/interview/:meetingId",
+      element: <InterviewWithProctoring />,
     },
     {
       path: "*",
